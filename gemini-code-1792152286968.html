@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基隆中正區｜美食盲盒地圖 Food Roulette Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #f97316;
+            --accent-hover: #ea580c;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --green: #22c55e;
+            --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding-bottom: 3rem;
+        }
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 1.8rem 1rem;
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+        }
+        header h1 { color: var(--accent); font-size: 1.9rem; margin-bottom: 0.4rem; }
+        header p { color: var(--muted); font-size: 0.95rem; }
+
+        .container {
+            max-width: 1150px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 860px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.4rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+        }
+        .panel-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-left: 0.6rem;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 篩選與控制區 */
+        .control-group { margin-bottom: 1rem; }
+        .control-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; display: block; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+        .chip {
+            background: #0f172a;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.85rem;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-weight: 600;
+        }
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f172a;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        select, button.loc-btn {
+            background: #1e293b;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* 轉盤區 */
+        .wheel-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1rem 0;
+            position: relative;
+        }
+        .pointer {
+            width: 0; height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-top: 26px solid #ef4444;
+            position: absolute;
+            top: -8px;
+            z-index: 10;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+        }
+        canvas#wheel {
+            max-width: 290px;
+            width: 100%;
+            height: auto;
+            border-radius: 50%;
+            box-shadow: 0 0 0 6px #334155, 0 8px 25px rgba(0,0,0,0.5);
+        }
+        .spin-btn {
+            margin-top: 1.2rem;
+            width: 100%;
+            padding: 0.85rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+            transition: transform 0.15s;
+        }
+        .spin-btn:hover { transform: translateY(-2px); }
+        .spin-btn:disabled { background: #475569; cursor: not-allowed; box-shadow: none; }
+
+        /* 結果推坑卡 */
+        .result-box {
+            display: none;
+            margin-top: 1rem;
+            padding: 1.1rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(249,115,22,0.18), rgba(239,68,68,0.12));
+            border: 1px solid var(--accent);
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .result-box h3 { color: #fdba74; font-size: 1.25rem; margin-bottom: 0.3rem; }
+        .slogan { color: #fef08a; font-weight: 600; font-size: 0.95rem; margin: 0.5rem 0; }
+        .nav-link {
+            display: inline-block;
+            margin-top: 0.6rem;
+            background: var(--green);
+            color: #052e16;
+            font-weight: 700;
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        /* 地圖與清單 */
+        #map {
+            width: 100%;
+            height: 360px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+        .store-list {
+            max-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .store-item {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .store-item:hover { border-color: var(--accent); }
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: #334155;
+            margin-left: 0.4rem;
+        }
+        .badge.open { background: rgba(34,197,94,0.2); color: #4ade80; }
+        .badge.closed { background: rgba(239,68,68,0.2); color: #f87171; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🎲 基隆中正區・美食盲盒地圖</h1>
+    <p>拯救選擇困難症！自動過濾營業中店家，轉盤抽出下一餐並規劃步行路線</p>
+</header>
+
+<div class="container">
+    <!-- 左側：篩選與轉盤 -->
+    <div class="panel">
+        <div class="panel-title">
+            <span>1. 設定條件與開抽</span>
+            <span id="pool-count" style="font-size:0.85rem; color:var(--accent);">載入中...</span>
+        </div>
+
+        <div class="status-row">
+            <label style="cursor:pointer; display:flex; align-items:center; gap:0.4rem;">
+                <input type="checkbox" id="open-only" checked onchange="applyFilters()">
+                <span>僅列出「營業中」店家</span>
+            </label>
+            <div>
+                <span style="color:var(--muted); font-size:0.8rem;">時間：</span>
+                <select id="time-sim" onchange="applyFilters()">
+                    <option value="now">目前即時時間</option>
+                    <option value="12">模擬中午 (12:00)</option>
+                    <option value="18">模擬晚餐 (18:00)</option>
+                    <option value="22">模擬宵夜 (22:00)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">📍 目前出發位置（影響距離與步行時間計算）：</span>
+            <div class="btn-group">
+                <button class="loc-btn" onclick="setPresetLocation(25.1504, 121.7725, '海大校門口')">🏫 海大校門口</button>
+                <button class="loc-btn" onclick="setPresetLocation(25.1378, 121.7875, '新豐街商圈')">🛍️ 新豐街商圈</button>
+                <button class="loc-btn" onclick="setPresetLocation(25.1528, 121.7646, '正濱漁港')">⚓ 正濱漁港</button>
+                <button class="loc-btn" onclick="useRealGPS()" style="border-color:var(--accent); color:#fdba74;">🛰️ GPS 真實定位</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">🍽️ 料理風格：</span>
+            <div class="btn-group" id="style-filters">
+                <button class="chip active" data-val="all" onclick="selectFilter('style', 'all', this)">全部風格</button>
+                <button class="chip" data-val="台式" onclick="selectFilter('style', '台式', this)">台式傳統</button>
+                <button class="chip" data-val="西式" onclick="selectFilter('style', '西式', this)">美式 / 西式</button>
+                <button class="chip" data-val="異國" onclick="selectFilter('style', '異國', this)">日式 / 異國</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">🍚 主食分類：</span>
+            <div class="btn-group" id="type-filters">
+                <button class="chip active" data-val="all" onclick="selectFilter('type', 'all', this)">全部主食</button>
+                <button class="chip" data-val="飯" onclick="selectFilter('type', '飯', this)">飯類 / 便當</button>
+                <button class="chip" data-val="麵" onclick="selectFilter('type', '麵', this)">麵食 / 水餃</button>
+                <button class="chip" data-val="其他" onclick="selectFilter('type', '其他', this)">排餐 / 漢堡 / 點心</button>
+            </div>
+        </div>
+
+        <div class="wheel-box">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="320" height="320"></canvas>
+            <button id="spin-btn" class="spin-btn" onclick="spinWheel()">🎰 轉動美食盲盒！</button>
+        </div>
+
+        <div id="result-box" class="result-box">
+            <h3 id="res-name">餐廳名稱</h3>
+            <p id="res-meta" style="font-size:0.85rem; color:var(--muted);"></p>
+            <p id="res-slogan" class="slogan"></p>
+            <a id="res-nav" class="nav-link" href="#" target="_blank">🗺️ 開啟 Google Maps 實際步行導航</a>
+        </div>
+    </div>
+
+    <!-- 右側：地圖與店家列表 -->
+    <div class="panel">
+        <div class="panel-title">
+            <span>2. 步行導航地圖與候選清單</span>
+            <span id="loc-status" style="font-size:0.8rem; color:#38bdf8;">定位：海大校門口</span>
+        </div>
+        <div id="map"></div>
+        <div class="control-label">📋 符合條件的候選名單（點擊可直接在圖上查看）：</div>
+        <div id="store-list" class="store-list"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // 基隆市中正區美食資料庫 (包含座標、風格、主食類型、營業時段 [開始小時, 結束小時])
+    const restaurants = [
+        { name: "雅廬韓式料理", style: "異國", type: "飯", lat: 25.1501, lng: 121.7712, hours: [11, 21], area: "北寧路 (海大對面)", desc: "經典石鍋拌飯與韓式烤肉飯" },
+        { name: "磨豆人文咖啡簡餐", style: "台式", type: "飯", lat: 25.1498, lng: 121.7705, hours: [11, 21], area: "北寧路", desc: "人氣椒麻雞腿飯與火鍋套餐" },
+        { name: "來來牛排館", style: "西式", type: "其他", lat: 25.1494, lng: 121.7695, hours: [11, 22], area: "北寧路", desc: "鐵板牛排配酥皮濃湯" },
+        { name: "填飽肚子早午餐", style: "西式", type: "其他", lat: 25.1482, lng: 121.7678, hours: [7, 15], area: "祥豐街", desc: "美式漢堡、帕尼尼與拼盤" },
+        { name: "林家三鮮水餃", style: "台式", type: "麵", lat: 25.1455, lng: 121.7662, hours: [11, 20], area: "中正路", desc: "手工三鮮水餃與酸辣湯" },
+        { name: "Select 99 吐司工坊", style: "西式", type: "其他", lat: 25.1415, lng: 121.7638, hours: [6, 14], area: "祥豐街", desc: "現烤熱壓吐司與特調飲品" },
+        { name: "五郎拉麵", style: "異國", type: "麵", lat: 25.1382, lng: 121.7868, hours: [11, 21], area: "新豐街", desc: "濃郁豚骨湯頭與炙燒叉燒" },
+        { name: "八方雲集 (新豐店)", style: "台式", type: "麵", lat: 25.1375, lng: 121.7882, hours: [10, 21], area: "新豐街", desc: "招牌鍋貼、水餃與乾麵" },
+        { name: "涮乃葉 (新豐店)", style: "異國", type: "飯", lat: 25.1369, lng: 121.7895, hours: [11, 22], area: "新豐街", desc: "日式涮涮鍋與咖哩飯吃到飽" },
+        { name: "正濱漁港手工炭烤吉古拉", style: "台式", type: "其他", lat: 25.1526, lng: 121.7641, hours: [8, 17], area: "正濱漁港", desc: "基隆在地特色碳烤魚漿點心" },
+        { name: "下麵 Lets Have Noodles", style: "異國", type: "麵", lat: 25.1531, lng: 121.7649, hours: [11, 20], area: "正濱漁港彩虹屋", desc: "漁港景觀創意拌麵與海鮮小食" },
+        { name: "海那邊冰店 / 輕食", style: "異國", type: "其他", lat: 25.1533, lng: 121.7652, hours: [12, 18], area: "正濱漁港彩虹屋", desc: "日式刨冰與港邊午茶甜點" },
+        { name: "祥豐街宵夜滷肉飯", style: "台式", type: "飯", lat: 25.1432, lng: 121.7648, hours: [17, 24], area: "祥豐街", desc: "深夜熱騰騰的滷肉飯與嘴邊肉湯" }
+    ];
+
+    let userLoc = { lat: 25.1504, lng: 121.7725, name: "海大校門口" };
+    let currentFilter = { style: "all", type: "all" };
+    let filteredList = [];
+    let currentAngle = 0;
+    let isSpinning = false;
+
+    // 初始化 Leaflet 地圖
+    const map = L.map('map').setView([userLoc.lat, userLoc.lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let userMarker = null;
+    let storeMarkers = L.layerGroup().addTo(map);
+    let routeLine = null;
+
+    // 判斷是否營業中
+    function isStoreOpen(store) {
+        const simVal = document.getElementById('time-sim').value;
+        const hour = simVal === 'now' ? new Date().getHours() : parseInt(simVal, 10);
+        return hour >= store.hours[0] && hour < store.hours[1];
+    }
+
+    // 計算兩點直線距離 (公尺) 與預估步行時間 (分鐘)
+    function calcDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) ** 2;
+        const dist = Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        const walkMins = Math.max(1, Math.round((dist * 1.25) / 75)); // 考慮道路彎曲係數1.25，每分鐘走75公尺
+        return { dist, walkMins };
+    }
+
+    // 設定位置
+    function setPresetLocation(lat, lng, name) {
+        userLoc = { lat, lng, name };
+        document.getElementById('loc-status').textContent = `定位：${name}`;
+        updateUserMarker();
+        applyFilters();
+    }
+
+    function useRealGPS() {
+        if (!navigator.geolocation) {
+            alert("您的瀏覽器不支援 GPS 定位功能！");
+            return;
+        }
+        document.getElementById('loc-status').textContent = "定位取得中...";
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setPresetLocation(pos.coords.latitude, pos.coords.longitude, "目前 GPS 位置");
+            },
+            () => {
+                alert("無法取得 GPS 位置，已維持預設定位點。");
+                document.getElementById('loc-status').textContent = `定位：${userLoc.name}`;
+            }
+        );
+    }
+
+    function updateUserMarker() {
+        if (userMarker) map.removeLayer(userMarker);
+        userMarker = L.circleMarker([userLoc.lat, userLoc.lng], {
+            radius: 9, fillColor: "#38bdf8", color: "#ffffff", weight: 3, fillOpacity: 1
+        }).addTo(map).bindPopup(`<b>📍 你的位置：${userLoc.name}</b>`);
+        map.setView([userLoc.lat, userLoc.lng], 15);
+    }
+
+    // 篩選按鈕切換
+    function selectFilter(group, val, btn) {
+        currentFilter[group] = val;
+        const parent = document.getElementById(group === 'style' ? 'style-filters' : 'type-filters');
+        parent.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+    }
+
+    // 執行篩選並更新畫面
+    function applyFilters() {
+        const onlyOpen = document.getElementById('open-only').checked;
+        filteredList = restaurants.filter(r => {
+            const matchStyle = currentFilter.style === 'all' || r.style === currentFilter.style;
+            const matchType = currentFilter.type === 'all' || r.type === currentFilter.type;
+            const matchOpen = !onlyOpen || isStoreOpen(r);
+            return matchStyle && matchType && matchOpen;
+        });
+
+        document.getElementById('pool-count').textContent = `共 ${filteredList.length} 家候選`;
+        document.getElementById('spin-btn').disabled = filteredList.length === 0;
+        drawWheel();
+        renderMapAndList();
+    }
+
+    // 繪製轉盤
+    function drawWheel() {
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const cx = canvas.width / 2, cy = canvas.height / 2, r = cx - 8;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (filteredList.length === 0) {
+            ctx.fillStyle = "#334155";
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "#f8fafc";
+            ctx.font = "bold 16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("目前無符合且營業中的餐廳", cx, cy);
+            return;
+        }
+
+        const slice = (Math.PI * 2) / filteredList.length;
+        const colors = ["#ea580c", "#d97706", "#0284c7", "#4f46e5", "#0d9488", "#db2777", "#7c3aed"];
+
+        filteredList.forEach((item, i) => {
+            const start = currentAngle + i * slice;
+            const end = start + slice;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, r, start, end);
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.fill();
+            ctx.strokeStyle = "#1e293b";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 繪製文字
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(start + slice / 2);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 13px 'Microsoft JhengHei', sans-serif";
+            const label = item.name.length > 8 ? item.name.slice(0, 8) + "…" : item.name;
+            ctx.fillText(label, r - 14, 5);
+            ctx.restore();
+        });
+    }
+
+    // 轉盤旋轉動畫
+    function spinWheel() {
+        if (isSpinning || filteredList.length === 0) return;
+        isSpinning = true;
+        document.getElementById('result-box').style.display = 'none';
+
+        const extraSpins = (Math.random() * 4 + 5) * Math.PI * 2;
+        const startAngle = currentAngle;
+        const duration = 3200;
+        const startTime = performance.now();
+
+        function animate(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            currentAngle = startAngle + extraSpins * easeOut;
+            drawWheel();
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                isSpinning = false;
+                announceWinner();
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    // 計算指標指到的餐廳 (指標位於正上方 1.5 * Math.PI)
+    function announceWinner() {
+        const slice = (Math.PI * 2) / filteredList.length;
+        const pointerAngle = 1.5 * Math.PI;
+        let normalized = (pointerAngle - (currentAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        const index = Math.floor(normalized / slice) % filteredList.length;
+        const winner = filteredList[index];
+        focusStore(winner, true);
+    }
+
+    // 在地圖與結果卡顯示選中店家與路線
+    function focusStore(store, showCard) {
+        const { dist, walkMins } = calcDistance(userLoc.lat, userLoc.lng, store.lat, store.lng);
+
+        if (routeLine) map.removeLayer(routeLine);
+        routeLine = L.polyline([[userLoc.lat, userLoc.lng], [store.lat, store.lng]], {
+            color: "#f97316", weight: 4, dashArray: "8, 8"
+        }).addTo(map);
+
+        map.fitBounds(routeLine.getBounds(), { padding: [45, 45] });
+
+        if (showCard) {
+            document.getElementById('res-name').textContent = `🎉 抽中：${store.name}`;
+            document.getElementById('res-meta').textContent = `${store.area} ｜ ${store.style}・${store.type} ｜ 營業時間 ${store.hours[0]}:00–${store.hours[1]}:00`;
+            document.getElementById('res-slogan').textContent = `👉 命中註定就是這家了！${store.desc}，距離約 ${dist} 公尺，走路只要 ${walkMins} 分鐘！`;
+            document.getElementById('res-nav').href = `https://www.google.com/maps/dir/?api=1&origin=${userLoc.lat},${userLoc.lng}&destination=${store.lat},${store.lng}&travelmode=walking`;
+            document.getElementById('result-box').style.display = 'block';
+        }
+    }
+
+    // 渲染地圖標記與下方列表
+    function renderMapAndList() {
+        storeMarkers.clearLayers();
+        const listEl = document.getElementById('store-list');
+        listEl.innerHTML = "";
+
+        filteredList.forEach(store => {
+            const open = isStoreOpen(store);
+            const { dist, walkMins } = calcDistance(userLoc.lat, userLoc.lng, store.lat, store.lng);
+
+            // 加入地圖標記
+            const marker = L.marker([store.lat, store.lng]).addTo(storeMarkers);
+            marker.bindPopup(`<b>${store.name}</b><br>${store.desc}<br>距離：約 ${dist}m (步行 ${walkMins} 分鐘)`);
+
+            // 加入清單項目
+            const item = document.createElement('div');
+            item.className = 'store-item';
+            item.onclick = () => {
+                focusStore(store, true);
+                marker.openPopup();
+            };
+            item.innerHTML = `
+                <div>
+                    <strong>${store.name}</strong>
+                    <span class="badge">${store.style} / ${store.type}</span>
+                    <span class="badge ${open ? 'open' : 'closed'}">${open ? '營業中' : '休息中'}</span>
+                    <div style="font-size:0.8rem; color:var(--muted); margin-top:2px;">${store.area}・${store.desc} (${store.hours[0]}:00-${store.hours[1]}:00)</div>
+                </div>
+                <div style="text-align:right; font-size:0.85rem; color:#fdba74; white-space:nowrap;">
+                    🚶 ${walkMins} 分鐘<br><span style="font-size:0.75rem; color:var(--muted);">${dist} m</span>
+                </div>
+            `;
+            listEl.appendChild(item);
+        });
+    }
+
+    // 啟動初始化
+    updateUserMarker();
+    applyFilters();
+</script>
+
+</body>
+</html>

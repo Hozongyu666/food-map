@@ -3,167 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>基隆美食盲盒地圖 ULTIMATE｜中正區・信義區・海大・八斗子</title>
+    <title>基隆美食地圖 ｜中正區・信義區・海大・八斗子</title>
+    <!-- 引入 Google Fonts 思源黑體與圓潤英文字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg: #0b1120; --card: #1e293b; --card-dark: #0f172a;
-            --accent: #f97316; --accent2: #38bdf8; --green: #22c55e;
-            --text: #f8fafc; --muted: #94a3b8; --border: #334155;
+            --bg-deep: #070b14;
+            --card-bg: rgba(22, 32, 50, 0.75);
+            --box-bg: rgba(11, 17, 30, 0.78);
+            --accent: #ff7a18;
+            --accent-pink: #e52e71;
+            --accent-blue: #38bdf8;
+            --green: #10b981;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 3rem; }
         
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-deep);
+            background-image: 
+                radial-gradient(circle at 12% 18%, rgba(255, 122, 24, 0.16) 0%, transparent 38%),
+                radial-gradient(circle at 88% 22%, rgba(56, 189, 248, 0.14) 0%, transparent 40%),
+                radial-gradient(circle at 50% 85%, rgba(229, 46, 113, 0.1) 0%, transparent 45%);
+            background-attachment: fixed;
+            color: var(--text);
+            padding-bottom: 3.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* 頂部橫幅 */
         header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 60%, #1e1b4b 100%);
-            padding: 1.5rem 1rem; text-align: center; border-bottom: 2px solid var(--accent);
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 2rem 1rem 1.8rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 122, 24, 0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
             position: relative;
         }
-        header h1 { color: var(--accent); font-size: 1.85rem; letter-spacing: 1px; }
-        header p { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; }
+        header h1 {
+            font-weight: 900;
+            font-size: clamp(1.45rem, 3.5vw, 2.2rem);
+            background: linear-gradient(135deg, #fff3e0 0%, #ffb74d 45%, #ff6e40 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 15px rgba(255, 122, 24, 0.3));
+            letter-spacing: 1.5px;
+        }
+        header p {
+            color: var(--muted);
+            font-size: 0.92rem;
+            margin-top: 0.55rem;
+            font-weight: 500;
+        }
 
         .container {
-            max-width: 1260px; margin: 1.2rem auto; padding: 0 1rem;
-            display: grid; grid-template-columns: 1.05fr 1.25fr; gap: 1.2rem;
+            max-width: 1280px;
+            margin: 1.6rem auto;
+            padding: 0 1.2rem;
+            display: grid;
+            grid-template-columns: 1.05fr 1.25fr;
+            gap: 1.5rem;
         }
-        @media (max-width: 920px) { .container { grid-template-columns: 1fr; } }
+        @media (max-width: 940px) { .container { grid-template-columns: 1fr; } }
 
+        /* 毛玻璃卡片面板 */
         .panel {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 14px; padding: 1.2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            background: var(--card-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--border);
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+        .panel:hover {
+            border-color: rgba(255, 122, 24, 0.3);
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.65);
+        }
+
         .panel-header {
-            display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid var(--accent); padding-left: 0.6rem; margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--accent);
+            padding-left: 0.75rem;
+            margin-bottom: 1.15rem;
         }
-        .panel-title { font-size: 1.15rem; font-weight: 800; }
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
 
         .control-box {
-            background: var(--card-dark); border: 1px solid var(--border);
-            border-radius: 10px; padding: 0.75rem 0.9rem; margin-bottom: 0.8rem;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0.9rem 1.05rem;
+            margin-bottom: 0.95rem;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+        .control-box:hover {
+            border-color: rgba(255, 255, 255, 0.2);
         }
         .control-label {
-            font-size: 0.82rem; color: var(--muted); margin-bottom: 0.45rem;
-            display: flex; justify-content: space-between; align-items: center; font-weight: 600;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin-bottom: 0.55rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
         }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-        
-        .chip, .loc-btn, .mode-btn {
-            background: #1e293b; color: var(--text); border: 1px solid var(--border);
-            padding: 0.35rem 0.75rem; border-radius: 99px; font-size: 0.82rem;
-            cursor: pointer; transition: 0.18s;
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-        .chip:hover, .loc-btn:hover { border-color: var(--accent); }
-        .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: bold; }
-        .loc-btn { border-radius: 7px; }
-        .loc-btn.active { background: var(--accent2); border-color: var(--accent2); color: #0f172a; font-weight: bold; }
 
-        /* 模式切換 Tabs */
-        .game-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
+        /* 核心互動：所有按鈕的彈簧懸浮放大特效 */
+        .chip, .loc-btn {
+            background: rgba(30, 41, 59, 0.9);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 0.42rem 0.9rem;
+            border-radius: 99px;
+            font-size: 0.84rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+        }
+        .loc-btn { border-radius: 10px; }
+
+        .chip:hover, .loc-btn:hover {
+            transform: translateY(-4px) scale(1.07);
+            border-color: var(--accent);
+            background: rgba(51, 65, 85, 0.95);
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(255, 122, 24, 0.28);
+            z-index: 2;
+        }
+        .chip:active, .loc-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .chip.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+            border-color: transparent;
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 6px 16px rgba(229, 46, 113, 0.4);
+        }
+        .loc-btn.active {
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            border-color: transparent;
+            color: #070b14;
+            font-weight: 800;
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+        }
+
+        /* 掃描雷達特別按鈕 */
+        .scan-special {
+            background: linear-gradient(135deg, #0284c7, #2563eb) !important;
+            border-color: #38bdf8 !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+        }
+        .scan-special:hover {
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.45) !important;
+        }
+
+        /* 遊戲模式切換 Tabs */
+        .game-tabs { display: flex; gap: 0.65rem; margin-bottom: 1rem; }
         .game-tab {
-            flex: 1; text-align: center; padding: 0.55rem; border-radius: 8px;
-            background: var(--card-dark); border: 1px solid var(--border);
-            color: var(--muted); cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s;
+            flex: 1;
+            text-align: center;
+            padding: 0.68rem;
+            border-radius: 12px;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.92rem;
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
         }
+        .game-tab:hover {
+            transform: translateY(-4px) scale(1.03);
+            color: #fff;
+            border-color: rgba(255, 122, 24, 0.5);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        .game-tab:active { transform: scale(0.97); }
         .game-tab.active {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: #fff; border-color: var(--accent);
+            background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 8px 22px rgba(255, 122, 24, 0.4);
         }
 
-        /* 轉盤區 */
-        .wheel-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; margin: 0.5rem 0; }
+        /* 轉盤區與動態指針 */
+        .wheel-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin: 0.6rem 0;
+        }
         .pointer {
-            width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
-            border-top: 28px solid #ef4444; position: absolute; top: -6px; z-index: 10;
-            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.7));
+            width: 0; height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ff3b5c;
+            position: absolute;
+            top: -8px;
+            z-index: 10;
+            filter: drop-shadow(0 4px 8px rgba(255, 59, 92, 0.6));
+            animation: pointerBob 1.6s ease-in-out infinite;
+        }
+        @keyframes pointerBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
         }
         canvas#wheel {
-            max-width: 285px; width: 100%; border-radius: 50%;
-            box-shadow: 0 0 0 6px #334155, 0 8px 25px rgba(0,0,0,0.5);
+            max-width: 295px;
+            width: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 0 7px rgba(51, 65, 85, 0.8), 0 12px 35px rgba(0, 0, 0, 0.65);
+            transition: transform 0.35s var(--spring), box-shadow 0.35s ease;
         }
-        .wheel-actions { display: flex; gap: 0.5rem; width: 100%; margin-top: 0.9rem; }
+        canvas#wheel:hover {
+            transform: scale(1.025);
+            box-shadow: 0 0 0 7px rgba(255, 122, 24, 0.5), 0 15px 40px rgba(255, 122, 24, 0.25);
+        }
+
+        .wheel-actions { display: flex; gap: 0.65rem; width: 100%; margin-top: 1.05rem; }
         .spin-btn {
-            flex: 2; padding: 0.8rem; font-size: 1.05rem; font-weight: 800; color: #fff;
-            background: linear-gradient(135deg, #f97316, #ef4444); border: none;
-            border-radius: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(249,115,22,0.4);
+            flex: 2;
+            padding: 0.9rem;
+            font-size: 1.08rem;
+            font-weight: 900;
+            font-family: inherit;
+            color: #fff;
+            background: linear-gradient(135deg, #ff7a18 0%, #e52e71 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 8px 22px rgba(229, 46, 113, 0.45);
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, filter 0.25s ease;
         }
+        .spin-btn:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 14px 28px rgba(229, 46, 113, 0.65);
+            filter: brightness(1.08);
+        }
+        .spin-btn:active { transform: translateY(0) scale(0.96); }
+        .spin-btn:disabled { background: #475569; cursor: not-allowed; box-shadow: none; transform: none; }
+
         .shuffle-btn {
-            flex: 1; padding: 0.8rem; font-size: 0.85rem; font-weight: bold; color: var(--text);
-            background: #334155; border: 1px solid #475569; border-radius: 10px; cursor: pointer;
+            flex: 1;
+            padding: 0.9rem;
+            font-size: 0.88rem;
+            font-weight: 700;
+            font-family: inherit;
+            color: var(--text);
+            background: rgba(51, 65, 85, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
         }
-        .spin-btn:hover, .shuffle-btn:hover { filter: brightness(1.1); }
+        .shuffle-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            background: rgba(71, 85, 105, 0.95);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.25);
+        }
+        .shuffle-btn:active { transform: scale(0.96); }
 
         /* 二選一 PK 擂台 */
-        #pk-arena { display: none; text-align: center; padding: 1rem 0.5rem; }
-        .pk-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 0.8rem; }
+        #pk-arena { display: none; text-align: center; padding: 1rem 0.4rem; }
+        .pk-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-top: 0.9rem; }
         .pk-card {
-            background: var(--card-dark); border: 2px solid var(--border); border-radius: 12px;
-            padding: 1.2rem 0.8rem; cursor: pointer; transition: 0.2s;
+            background: var(--box-bg);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.4rem 0.9rem;
+            cursor: pointer;
+            transition: transform 0.3s var(--spring), border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }
-        .pk-card:hover { border-color: var(--accent); transform: translateY(-3px); background: rgba(249,115,22,0.1); }
-        .pk-card h4 { font-size: 1.1rem; color: #fdba74; margin-bottom: 0.4rem; }
+        .pk-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-6px) scale(1.05);
+            background: rgba(255, 122, 24, 0.14);
+            box-shadow: 0 12px 26px rgba(255, 122, 24, 0.3);
+        }
+        .pk-card:active { transform: scale(0.96); }
+        .pk-card h4 { font-size: 1.15rem; color: #fdba74; margin-bottom: 0.45rem; font-weight: 800; }
 
         /* 抽中結果卡 */
         .result-box {
-            display: none; margin-top: 0.9rem; padding: 1rem; border-radius: 10px;
-            background: linear-gradient(135deg, rgba(249,115,22,0.22), rgba(239,68,68,0.15));
-            border: 2px solid var(--accent); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: none;
+            margin-top: 1.1rem;
+            padding: 1.2rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(255, 122, 24, 0.22), rgba(229, 46, 113, 0.16));
+            border: 2px solid var(--accent);
+            box-shadow: 0 12px 30px rgba(255, 122, 24, 0.25);
+            animation: popIn 0.45s var(--spring);
         }
-        @keyframes popIn { 0% { opacity: 0; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
-        .result-box h3 { color: #fdba74; font-size: 1.25rem; }
-        .slogan { color: #fef08a; font-weight: bold; font-size: 0.92rem; margin: 0.4rem 0; }
-        .btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.85) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .result-box h3 { color: #fed7aa; font-size: 1.3rem; font-weight: 900; }
+        .slogan { color: #fef08a; font-weight: 700; font-size: 0.95rem; margin: 0.5rem 0; }
+        .btn-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.75rem; }
         .nav-link {
-            background: var(--green); color: #052e16; font-weight: 800;
-            padding: 0.45rem 0.85rem; border-radius: 6px; text-decoration: none; font-size: 0.82rem; border: none; cursor: pointer;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-weight: 800;
+            font-family: inherit;
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.35);
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, filter 0.2s ease;
         }
+        .nav-link:hover {
+            transform: translateY(-4px) scale(1.06);
+            box-shadow: 0 10px 22px rgba(16, 185, 129, 0.5);
+            filter: brightness(1.08);
+        }
+        .nav-link:active { transform: scale(0.95); }
 
-        /* 地圖與清單 */
-        .map-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.6rem; }
-        #map, #gmap-frame { width: 100%; height: 370px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 0.8rem; }
+        /* 地圖與搜尋清單 */
+        .map-tabs { display: flex; gap: 0.55rem; margin-bottom: 0.75rem; }
+        #map, #gmap-frame {
+            width: 100%;
+            height: 380px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 0.9rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
         #gmap-frame { display: none; background: #0f172a; }
 
-        .search-bar {
-            display: flex; gap: 0.4rem; margin-bottom: 0.6rem;
-        }
+        .search-bar { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
         .search-bar input {
-            flex: 1; background: var(--card-dark); border: 1px solid var(--border);
-            color: #fff; padding: 0.45rem 0.7rem; border-radius: 6px; font-size: 0.85rem;
+            flex: 1;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.55rem 0.85rem;
+            border-radius: 10px;
+            font-size: 0.86rem;
+            font-family: inherit;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
         }
-        .store-list { max-height: 270px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 4px; }
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 122, 24, 0.2);
+        }
+
+        /* 店家清單與懸浮放大 */
+        .store-list {
+            max-height: 280px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            padding: 4px 6px 4px 2px;
+        }
+        .store-list::-webkit-scrollbar { width: 6px; }
+        .store-list::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
+        .store-list::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 8px; }
+        .store-list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
         .store-item {
-            background: var(--card-dark); border: 1px solid var(--border); padding: 0.65rem 0.85rem;
-            border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; transition: 0.15s;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            border-left: 4px solid transparent;
+            padding: 0.75rem 0.95rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.28s var(--spring), border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
         }
-        .store-item:hover { border-color: var(--accent); background: #162032; }
-        .badge { font-size: 0.72rem; padding: 0.12rem 0.45rem; border-radius: 4px; background: #334155; margin-left: 0.3rem; }
-        .badge.area { background: rgba(56,189,248,0.18); color: #7dd3fc; }
+        .store-item:hover {
+            transform: translateY(-3px) scale(1.02);
+            border-color: rgba(255, 122, 24, 0.45);
+            border-left-color: var(--accent);
+            background: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+        }
+        .store-item:active { transform: scale(0.98); }
+
+        .badge {
+            font-size: 0.73rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            background: rgba(51, 65, 85, 0.9);
+            margin-left: 0.35rem;
+            font-weight: 600;
+        }
+        .badge.area { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
+        
         .del-btn {
-            background: transparent; border: none; color: #64748b; cursor: pointer;
-            font-size: 0.9rem; margin-left: 8px; padding: 2px 5px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            transition: transform 0.25s var(--spring), background 0.2s ease, color 0.2s ease;
         }
-        .del-btn:hover { color: #ef4444; }
+        .del-btn:hover {
+            transform: scale(1.2);
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        .reset-link {
+            color: #fdba74;
+            cursor: pointer;
+            transition: transform 0.25s var(--spring), color 0.2s ease;
+            display: inline-block;
+        }
+        .reset-link:hover {
+            transform: scale(1.06);
+            color: #fff;
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>🎲 基隆美食盲盒地圖 ULTIMATE</h1>
-    <p>中正路・祥豐街・海大・正濱和平島・新豐深溪・信義區・潮境八斗子｜支援即時雷達掃描與 Google Maps 連動</p>
+    <h1>基隆美食地圖 ｜中正區・信義區・海大・八斗子</h1>
+    <p>中正路・祥豐街・海大・正濱和平島・新豐深溪・信義區・潮境八斗子｜即時雷達掃描與 Google Maps 連動</p>
 </header>
 
 <div class="container">
     <!-- 左側面板：篩選、轉盤、PK擂台 -->
     <div class="panel">
         <div class="panel-header">
-            <span class="panel-title">1. 盲盒條件設定</span>
-            <div style="display:flex; gap:8px; align-items:center;">
-                <label style="font-size:0.8rem; color:var(--muted); cursor:pointer;">
-                    <input type="checkbox" id="sound-toggle" checked> 🔊 音效
+            <span class="panel-title">1. 美食探索條件設定</span>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <label style="font-size:0.82rem; color:var(--muted); cursor:pointer;">
+                    <input type="checkbox" id="sound-toggle" checked style="accent-color:var(--accent);"> 🔊 音效
                 </label>
-                <span id="pool-count" style="font-size:0.85rem; color:var(--accent); font-weight:bold;">載入中</span>
+                <span id="pool-count" style="font-size:0.88rem; color:#ffb74d; font-weight:800;">載入中</span>
             </div>
         </div>
 
@@ -176,17 +484,17 @@
                     <button class="chip" id="mode-scooter" onclick="setTravelMode('scooter')">🛵 騎車</button>
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
-                <input type="range" id="time-limit" min="3" max="45" value="25" step="1" style="flex:1; accent-color:var(--accent);" oninput="updateTimeLabel(); applyFilters();">
-                <span id="time-label" style="color:#fdba74; font-weight:bold; min-width:85px; text-align:right;">25 分鐘內</span>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+                <input type="range" id="time-limit" min="3" max="45" value="25" step="1" style="flex:1; accent-color:var(--accent); cursor:pointer;" oninput="updateTimeLabel(); applyFilters();">
+                <span id="time-label" style="color:#fdba74; font-weight:800; min-width:85px; text-align:right;">25 分鐘內</span>
             </div>
         </div>
 
         <!-- 快速定位與 Live 雷達 -->
         <div class="control-box">
             <div class="control-label">
-                <span>📍 出發點（也可直接點擊右側地圖任意處設定）：</span>
-                <button class="chip" style="background:#0284c7; border-color:#38bdf8; color:#fff;" onclick="scanOverpassAPI()" id="scan-btn">📡 掃描地圖周邊真實店家</button>
+                <span>📍 出發點（點擊右側地圖任意處可直接換起點）：</span>
+                <button class="chip scan-special" onclick="scanOverpassAPI()" id="scan-btn">📡 掃描地圖周邊真實店家</button>
             </div>
             <div class="btn-group" id="loc-btns">
                 <button class="loc-btn active" onclick="setLoc(this, 25.1504, 121.7725, '海大校門口')">🏫 海大</button>
@@ -196,14 +504,14 @@
                 <button class="loc-btn" onclick="setLoc(this, 25.1378, 121.7875, '新豐街商圈')">🛍️ 新豐街</button>
                 <button class="loc-btn" onclick="setLoc(this, 25.1318, 121.7850, '深溪路愛買')">🛒 深溪路/信義</button>
                 <button class="loc-btn" onclick="setLoc(this, 25.1438, 121.8021, '潮境公園')">🌊 八斗子/潮境</button>
-                <button class="loc-btn" onclick="useRealGPS()" style="border-color:#f97316; color:#fdba74;">🛰️ GPS定位</button>
+                <button class="loc-btn" onclick="useRealGPS()" style="border-color:var(--accent); color:#fdba74;">🛰️ GPS定位</button>
             </div>
         </div>
 
         <!-- 區域與種類篩選 -->
         <div class="control-box">
             <span class="control-label">🗺️ 商圈篩選：</span>
-            <div class="btn-group" id="area-filters" style="margin-bottom:8px;">
+            <div class="btn-group" id="area-filters" style="margin-bottom:10px;">
                 <button class="chip active" onclick="setFilter('area', 'all', this)">全部區域</button>
                 <button class="chip" onclick="setFilter('area', '中正路', this)">中正路/三沙灣</button>
                 <button class="chip" onclick="setFilter('area', '祥豐街', this)">祥豐街</button>
@@ -233,7 +541,7 @@
         <div id="wheel-section" class="wheel-wrapper">
             <div class="pointer"></div>
             <canvas id="wheel" width="320" height="320"></canvas>
-            <div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">* 為保持畫面清晰，轉盤每次隨機抽取至多 12 家候選店上場</div>
+            <div style="font-size:0.76rem; color:var(--muted); margin-top:6px;">* 為保持畫面清晰，轉盤每次隨機抽取至多 12 家候選店上場</div>
             <div class="wheel-actions">
                 <button id="spin-btn" class="spin-btn" onclick="spinWheel()">🎰 轉動命運輪盤！</button>
                 <button class="shuffle-btn" onclick="shuffleWheelSample()">🔄 換一批上轉盤</button>
@@ -242,28 +550,28 @@
 
         <!-- 模式 B：二選一 PK -->
         <div id="pk-arena">
-            <p style="font-size:0.9rem; color:#fdba74; font-weight:bold;" id="pk-round-text">⚔️ 第一回合：直覺點選你現在比較想吃的那一家！</p>
+            <p style="font-size:0.92rem; color:#fdba74; font-weight:800;" id="pk-round-text">⚔️ 第一回合：直覺點選你現在比較想吃的那一家！</p>
             <div class="pk-cards">
                 <div class="pk-card" onclick="choosePK(0)">
                     <h4 id="pk-name-0">店家 A</h4>
-                    <p id="pk-desc-0" style="font-size:0.8rem; color:var(--muted);"></p>
+                    <p id="pk-desc-0" style="font-size:0.82rem; color:var(--muted);"></p>
                 </div>
                 <div class="pk-card" onclick="choosePK(1)">
                     <h4 id="pk-name-1">店家 B</h4>
-                    <p id="pk-desc-1" style="font-size:0.8rem; color:var(--muted);"></p>
+                    <p id="pk-desc-1" style="font-size:0.82rem; color:var(--muted);"></p>
                 </div>
             </div>
-            <button class="shuffle-btn" style="margin-top:0.8rem; width:100%;" onclick="startPK()">🔄 重新洗牌開局</button>
+            <button class="shuffle-btn" style="margin-top:0.9rem; width:100%;" onclick="startPK()">🔄 重新洗牌開局</button>
         </div>
 
         <!-- 中獎結果卡 -->
         <div id="result-box" class="result-box">
             <h3 id="res-name">🎉 抽中餐廳</h3>
-            <p id="res-meta" style="font-size:0.82rem; color:var(--muted); margin-top:2px;"></p>
+            <p id="res-meta" style="font-size:0.84rem; color:#cbd5e1; margin-top:4px;"></p>
             <p id="res-slogan" class="slogan"></p>
             <div class="btn-row">
                 <a id="res-nav" class="nav-link" href="#" target="_blank">🗺️ 開啟 Google Maps 導航</a>
-                <button class="nav-link" style="background:#38bdf8;" onclick="openInEmbeddedGMap()">🌐 在右側內嵌 Google 地圖查看</button>
+                <button class="nav-link" style="background:linear-gradient(135deg, #0284c7, #2563eb);" onclick="openInEmbeddedGMap()">🌐 在右側內嵌 Google 地圖查看</button>
             </div>
         </div>
     </div>
@@ -272,7 +580,7 @@
     <div class="panel">
         <div class="panel-header">
             <span class="panel-title">2. 美食雷達與 Google 地圖檢視</span>
-            <span id="loc-status" style="font-size:0.8rem; color:var(--accent2);">📍 海大校門口</span>
+            <span id="loc-status" style="font-size:0.85rem; color:var(--accent-blue); font-weight:700;">📍 海大校門口</span>
         </div>
 
         <!-- 地圖模式切換 -->
@@ -287,13 +595,13 @@
         <!-- 關鍵字搜尋與手動新增 -->
         <div class="search-bar">
             <input type="text" id="keyword-input" placeholder="🔍 搜尋店名或餐點 (例：咖哩、水餃、中正路)..." oninput="applyFilters()">
-            <input type="text" id="custom-store-name" placeholder="➕ 輸入自訂店名新增..." style="max-width:165px;">
-            <button class="chip" style="background:var(--accent); color:#fff; border:none;" onclick="addCustomStore()">新增</button>
+            <input type="text" id="custom-store-name" placeholder="➕ 輸入自訂店名..." style="max-width:165px;">
+            <button class="chip" style="background:linear-gradient(135deg, var(--accent), var(--accent-pink)); color:#fff; border:none; font-weight:700;" onclick="addCustomStore()">新增</button>
         </div>
 
         <div class="control-label">
             <span>📋 符合條件的店家清單（點擊定位，按 ✖ 可暫時踢出轉盤）：</span>
-            <span style="color:#fdba74; cursor:pointer;" onclick="resetBlacklist()">↺ 恢復全部踢除店家</span>
+            <span class="reset-link" onclick="resetBlacklist()">↺ 恢復全部踢除店家</span>
         </div>
         <div id="store-list" class="store-list"></div>
     </div>
@@ -301,7 +609,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // 內建 50+ 家基隆在地美食資料庫 (涵蓋中正路、祥豐街、海大、正濱和平島、新豐街、深溪路信義區、八斗子潮境)
+    // 內建 50+ 家基隆在地美食資料庫
     const defaultRestaurants = [
         // 【中正路 / 三沙灣】
         { name: "金龍肉焿", area: "中正路", type: "麵", lat: 25.1388, lng: 121.7545, desc: "三沙灣傳奇排隊肉焿、豬腳與滷肉飯" },
@@ -376,7 +684,7 @@
     let restaurants = [...defaultRestaurants];
     let blacklist = new Set();
     let userLoc = { lat: 25.1504, lng: 121.7725, name: "海大校門口" };
-    let travelMode = "walk"; // 'walk' or 'scooter'
+    let travelMode = "walk";
     let filters = { area: "all", type: "all" };
     let filteredList = [];
     let wheelSample = [];
@@ -384,7 +692,7 @@
     let isSpinning = false;
     let lastWinner = null;
 
-    // Web Audio API 音效合成器 (免外部音檔)
+    // Web Audio API 音效合成器
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTickSound(freq = 600, duration = 0.03) {
         if (!document.getElementById('sound-toggle').checked) return;
@@ -409,7 +717,6 @@
     let storeMarkers = L.layerGroup().addTo(map);
     let routeLine = null;
 
-    // 互動：點擊地圖任意處直接設為起點
     map.on('click', function(e) {
         document.querySelectorAll('.loc-btn').forEach(b => b.classList.remove('active'));
         userLoc = { lat: e.latlng.lat, lng: e.latlng.lng, name: "地圖自訂點擊位置" };
@@ -418,12 +725,11 @@
         applyFilters();
     });
 
-    // 距離與時間計算 (支援走路 75m/min 或 騎車 420m/min)
     function calcTravel(lat1, lon1, lat2, lon2) {
         const R = 6371000;
         const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
         const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-        const dist = Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.28); // 道路彎曲係數
+        const dist = Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * 1.28);
         const speed = travelMode === 'walk' ? 75 : 420;
         const mins = Math.max(1, Math.round(dist / speed));
         return { dist, mins };
@@ -466,7 +772,6 @@
         map.setView([userLoc.lat, userLoc.lng], 14);
     }
 
-    // 📡 即時連線 Overpass API 抓取地圖上真實註冊的所有餐廳
     async function scanOverpassAPI() {
         const btn = document.getElementById('scan-btn');
         btn.textContent = "⏳ 掃描地圖伺服器中...";
@@ -525,7 +830,6 @@
         if (document.getElementById('pk-arena').style.display === 'block') startPK();
     }
 
-    // 隨機抽樣最多 12 家上轉盤，保持轉盤字體清晰
     function shuffleWheelSample(playAudio = true) {
         if (playAudio) playTickSound(700, 0.05);
         const copy = [...filteredList].sort(() => Math.random() - 0.5);
@@ -540,24 +844,24 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (wheelSample.length === 0) {
-            ctx.fillStyle = "#334155"; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#fff"; ctx.font = "bold 15px sans-serif"; ctx.textAlign = "center";
+            ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#f8fafc"; ctx.font = "bold 15px 'Noto Sans TC', sans-serif"; ctx.textAlign = "center";
             ctx.fillText("條件內無店家，請調大時間或切換騎車", cx, cy);
             return;
         }
 
         const slice = (Math.PI * 2) / wheelSample.length;
-        const colors = ["#ea580c", "#d97706", "#0284c7", "#4f46e5", "#0d9488", "#db2777", "#7c3aed", "#16a34a"];
+        const colors = ["#ff7a18", "#e52e71", "#0284c7", "#6366f1", "#0d9488", "#d97706", "#8b5cf6", "#10b981"];
 
         wheelSample.forEach((item, i) => {
             const start = currentAngle + i * slice, end = start + slice;
             ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, end);
             ctx.fillStyle = colors[i % colors.length]; ctx.fill();
-            ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2; ctx.stroke();
+            ctx.strokeStyle = "#0b1120"; ctx.lineWidth = 2.5; ctx.stroke();
 
             ctx.save(); ctx.translate(cx, cy); ctx.rotate(start + slice/2);
-            ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = "bold 13px 'Microsoft JhengHei'";
-            ctx.fillText(item.name.length > 9 ? item.name.slice(0,9)+"…" : item.name, r - 14, 5);
+            ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = "700 13px 'Noto Sans TC', sans-serif";
+            ctx.fillText(item.name.length > 9 ? item.name.slice(0,9)+"…" : item.name, r - 15, 5);
             ctx.restore();
         });
     }
@@ -599,7 +903,7 @@
     function celebrateWinner(store) {
         lastWinner = store;
         playWinSound();
-        if (typeof confetti === 'function') confetti({ particleCount: 75, spread: 65, origin: { y: 0.65 } });
+        if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 70, origin: { y: 0.65 } });
         focusStore(store, true);
     }
 
@@ -609,7 +913,7 @@
         const modeIcon = travelMode === 'walk' ? '🚶 走路' : '🛵 騎車';
 
         if (routeLine) map.removeLayer(routeLine);
-        routeLine = L.polyline([[userLoc.lat, userLoc.lng], [store.lat, store.lng]], { color: "#f97316", weight: 4, dashArray: "8, 8" }).addTo(map);
+        routeLine = L.polyline([[userLoc.lat, userLoc.lng], [store.lat, store.lng]], { color: "#ff7a18", weight: 4, dashArray: "8, 8" }).addTo(map);
         map.fitBounds(routeLine.getBounds(), { padding: [45, 45] });
 
         if (showCard) {
@@ -622,7 +926,6 @@
         }
     }
 
-    // 遊戲模式切換：轉盤 vs 二選一 PK
     let pkPool = [], pkRound = 1, pkCurrentPair = [];
     function switchGame(mode) {
         document.getElementById('tab-wheel').classList.toggle('active', mode === 'wheel');
@@ -666,7 +969,6 @@
         }
     }
 
-    // 地圖雙引擎切換 (Leaflet vs Google Maps Iframe)
     function switchMapMode(mode) {
         document.getElementById('btn-leaflet').classList.toggle('active', mode === 'leaflet');
         document.getElementById('btn-gmap').classList.toggle('active', mode === 'gmap');
@@ -688,7 +990,6 @@
         switchMapMode('gmap');
     }
 
-    // 自訂新增與黑名單踢除
     function addCustomStore() {
         const inp = document.getElementById('custom-store-name');
         const name = inp.value.trim();
@@ -740,11 +1041,11 @@
                     <strong>${store.name}</strong>
                     <span class="badge area">${store.area}</span>
                     <span class="badge">${store.type}</span>
-                    <div style="font-size:0.78rem; color:var(--muted); margin-top:2px;">${store.desc}</div>
+                    <div style="font-size:0.78rem; color:var(--muted); margin-top:3px;">${store.desc}</div>
                 </div>
                 <div style="display:flex; align-items:center;">
-                    <div style="text-align:right; font-size:0.84rem; color:#fdba74; white-space:nowrap;">
-                        ${modeIcon} ${mins} 分<br><span style="font-size:0.72rem; color:var(--muted);">${dist}m</span>
+                    <div style="text-align:right; font-size:0.85rem; color:#fdba74; font-weight:700; white-space:nowrap;">
+                        ${modeIcon} ${mins} 分<br><span style="font-size:0.72rem; color:var(--muted); font-weight:500;">${dist}m</span>
                     </div>
                     <button class="del-btn" title="今天不想吃這家" onclick="removeStore(event, '${store.name}')">✖</button>
                 </div>

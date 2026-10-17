@@ -24,6 +24,7 @@
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
             font-family: 'Outfit', 'Noto Sans TC', sans-serif;
             background-color: var(--bg-deep);
@@ -34,10 +35,13 @@
             background-attachment: fixed;
             color: var(--text);
             padding-bottom: 3.5rem;
+            letter-spacing: 0.3px;
         }
+
         header {
             background: rgba(15, 23, 42, 0.82);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 2rem 1rem 1.8rem;
             text-align: center;
             border-bottom: 1px solid rgba(255, 122, 24, 0.35);
@@ -50,112 +54,426 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 4px 15px rgba(255, 122, 24, 0.3));
+            letter-spacing: 1.5px;
         }
-        header p { color: var(--muted); font-size: 0.92rem; margin-top: 0.55rem; }
+        header p {
+            color: var(--muted);
+            font-size: 0.92rem;
+            margin-top: 0.55rem;
+            font-weight: 500;
+        }
+
         .container {
-            max-width: 1280px; margin: 1.6rem auto; padding: 0 1.2rem;
-            display: grid; grid-template-columns: 1.05fr 1.25fr; gap: 1.5rem;
+            max-width: 1280px;
+            margin: 1.6rem auto;
+            padding: 0 1.2rem;
+            display: grid;
+            grid-template-columns: 1.05fr 1.25fr;
+            gap: 1.5rem;
         }
         @media (max-width: 940px) { .container { grid-template-columns: 1fr; } }
+
         .panel {
-            background: var(--card-bg); backdrop-filter: blur(18px);
-            border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--border);
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 20px;
+            padding: 1.5rem;
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+        .panel:hover {
+            border-color: rgba(255, 122, 24, 0.3);
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.65);
+        }
+
         .panel-header {
-            display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid var(--accent); padding-left: 0.75rem; margin-bottom: 1.15rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--accent);
+            padding-left: 0.75rem;
+            margin-bottom: 1.15rem;
         }
-        .panel-title { font-size: 1.2rem; font-weight: 800; color: #fff; }
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
         .control-box {
-            background: var(--box-bg); border: 1px solid var(--border);
-            border-radius: 14px; padding: 0.85rem 1.05rem; margin-bottom: 0.85rem;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0.85rem 1.05rem;
+            margin-bottom: 0.85rem;
+            transition: transform 0.25s ease, border-color 0.25s ease;
         }
+        .control-box:hover { border-color: rgba(255, 255, 255, 0.2); }
+        
         .control-label {
-            font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.55rem;
-            display: flex; justify-content: space-between; align-items: center; font-weight: 700; flex-wrap: wrap; gap: 6px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin-bottom: 0.55rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            flex-wrap: wrap;
+            gap: 6px;
         }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        /* 彈簧懸浮放大特效 */
         .chip, .loc-btn, .time-btn {
-            background: rgba(30, 41, 59, 0.9); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.12);
-            padding: 0.4rem 0.85rem; border-radius: 99px; font-size: 0.82rem; font-weight: 500; cursor: pointer;
-            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, background 0.25s ease;
+            background: rgba(30, 41, 59, 0.9);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 0.4rem 0.85rem;
+            border-radius: 99px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
         }
         .loc-btn { border-radius: 10px; }
+
         .chip:hover, .loc-btn:hover, .time-btn:hover {
-            transform: translateY(-4px) scale(1.07); border-color: var(--accent);
-            background: rgba(51, 65, 85, 0.95); color: #fff; box-shadow: 0 8px 18px rgba(255, 122, 24, 0.28); z-index: 2;
+            transform: translateY(-4px) scale(1.07);
+            border-color: var(--accent);
+            background: rgba(51, 65, 85, 0.95);
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(255, 122, 24, 0.28);
+            z-index: 2;
         }
-        .chip.active { background: linear-gradient(135deg, var(--accent), var(--accent-pink)); border-color: transparent; color: #fff; font-weight: 700; }
-        .loc-btn.active { background: linear-gradient(135deg, #38bdf8, #0284c7); border-color: transparent; color: #070b14; font-weight: 800; }
-        .time-btn.active { background: linear-gradient(135deg, #10b981, #059669); border-color: transparent; color: #fff; font-weight: 700; }
+        .chip:active, .loc-btn:active, .time-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .chip.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+            border-color: transparent;
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 6px 16px rgba(229, 46, 113, 0.4);
+        }
+        .loc-btn.active {
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
+            border-color: transparent;
+            color: #070b14;
+            font-weight: 800;
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+        }
+        .time-btn.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: transparent;
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        /* 營業中開關美化 */
         .open-toggle-label {
-            display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; padding: 0.28rem 0.75rem; border-radius: 99px; font-size: 0.8rem; cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            padding: 0.28rem 0.75rem;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease;
         }
-        .scan-special { background: linear-gradient(135deg, #0284c7, #2563eb) !important; border-color: #38bdf8 !important; color: #fff !important; font-weight: 700 !important; }
+        .open-toggle-label:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        .scan-special {
+            background: linear-gradient(135deg, #0284c7, #2563eb) !important;
+            border-color: #38bdf8 !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+        }
+
+        /* 遊戲模式切換 Tabs */
         .game-tabs { display: flex; gap: 0.65rem; margin-bottom: 1rem; }
         .game-tab {
-            flex: 1; text-align: center; padding: 0.65rem; border-radius: 12px; background: var(--box-bg);
-            border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-weight: 700; font-size: 0.92rem;
-            transition: 0.25s;
+            flex: 1;
+            text-align: center;
+            padding: 0.65rem;
+            border-radius: 12px;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.92rem;
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
         }
-        .game-tab.active { background: linear-gradient(135deg, var(--accent), var(--accent-pink)); color: #fff; border-color: transparent; }
-        .wheel-wrapper { display: flex; flex-direction: column; align-items: center; position: relative; margin: 0.5rem 0; }
+        .game-tab:hover {
+            transform: translateY(-4px) scale(1.03);
+            color: #fff;
+            border-color: rgba(255, 122, 24, 0.5);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        .game-tab:active { transform: scale(0.97); }
+        .game-tab.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 8px 22px rgba(255, 122, 24, 0.4);
+        }
+
+        /* 轉盤區 */
+        .wheel-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin: 0.5rem 0;
+        }
         .pointer {
-            width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff3b5c;
-            position: absolute; top: -8px; z-index: 10; filter: drop-shadow(0 4px 8px rgba(255, 59, 92, 0.6));
+            width: 0; height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ff3b5c;
+            position: absolute;
+            top: -8px;
+            z-index: 10;
+            filter: drop-shadow(0 4px 8px rgba(255, 59, 92, 0.6));
+            animation: pointerBob 1.6s ease-in-out infinite;
         }
-        canvas#wheel { max-width: 290px; width: 100%; border-radius: 50%; box-shadow: 0 0 0 7px rgba(51, 65, 85, 0.8), 0 12px 35px rgba(0,0,0,0.65); }
+        @keyframes pointerBob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+        }
+        canvas#wheel {
+            max-width: 290px;
+            width: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 0 7px rgba(51, 65, 85, 0.8), 0 12px 35px rgba(0, 0, 0, 0.65);
+            transition: transform 0.35s var(--spring), box-shadow 0.35s ease;
+        }
+        canvas#wheel:hover {
+            transform: scale(1.025);
+            box-shadow: 0 0 0 7px rgba(255, 122, 24, 0.5), 0 15px 40px rgba(255, 122, 24, 0.25);
+        }
+
         .wheel-actions { display: flex; gap: 0.65rem; width: 100%; margin-top: 1rem; }
         .spin-btn {
-            flex: 2; padding: 0.88rem; font-size: 1.06rem; font-weight: 900; color: #fff;
-            background: linear-gradient(135deg, var(--accent), var(--accent-pink)); border: none; border-radius: 12px; cursor: pointer;
+            flex: 2;
+            padding: 0.88rem;
+            font-size: 1.06rem;
+            font-weight: 900;
+            font-family: inherit;
+            color: #fff;
+            background: linear-gradient(135deg, #ff7a18 0%, #e52e71 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
             box-shadow: 0 8px 22px rgba(229, 46, 113, 0.45);
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, filter 0.25s ease;
         }
+        .spin-btn:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 14px 28px rgba(229, 46, 113, 0.65);
+            filter: brightness(1.08);
+        }
+        .spin-btn:active { transform: translateY(0) scale(0.96); }
+        .spin-btn:disabled { background: #475569; cursor: not-allowed; box-shadow: none; transform: none; }
+
         .shuffle-btn {
-            flex: 1; padding: 0.88rem; font-size: 0.86rem; font-weight: 700; color: var(--text);
-            background: rgba(51, 65, 85, 0.85); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; cursor: pointer;
+            flex: 1;
+            padding: 0.88rem;
+            font-size: 0.86rem;
+            font-weight: 700;
+            font-family: inherit;
+            color: var(--text);
+            background: rgba(51, 65, 85, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
         }
+        .shuffle-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            background: rgba(71, 85, 105, 0.95);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.25);
+        }
+        .shuffle-btn:active { transform: scale(0.96); }
+
+        /* 二選一 PK 擂台 */
         #pk-arena { display: none; text-align: center; padding: 1rem 0.4rem; }
         .pk-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-top: 0.9rem; }
         .pk-card {
-            background: var(--box-bg); border: 2px solid var(--border); border-radius: 16px; padding: 1.4rem 0.9rem; cursor: pointer;
-            transition: 0.25s;
+            background: var(--box-bg);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.4rem 0.9rem;
+            cursor: pointer;
+            transition: transform 0.3s var(--spring), border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }
-        .pk-card:hover { border-color: var(--accent); transform: translateY(-4px); background: rgba(255, 122, 24, 0.14); }
+        .pk-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-6px) scale(1.05);
+            background: rgba(255, 122, 24, 0.14);
+            box-shadow: 0 12px 26px rgba(255, 122, 24, 0.3);
+        }
+        .pk-card:active { transform: scale(0.96); }
         .pk-card h4 { font-size: 1.15rem; color: #fdba74; margin-bottom: 0.45rem; font-weight: 800; }
+
+        /* 抽中結果卡 */
         .result-box {
-            display: none; margin-top: 1.05rem; padding: 1.15rem; border-radius: 14px;
-            background: linear-gradient(135deg, rgba(255,122,24,0.22), rgba(229,46,113,0.16)); border: 2px solid var(--accent);
+            display: none;
+            margin-top: 1.05rem;
+            padding: 1.15rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(255, 122, 24, 0.22), rgba(229, 46, 113, 0.16));
+            border: 2px solid var(--accent);
+            box-shadow: 0 12px 30px rgba(255, 122, 24, 0.25);
+            animation: popIn 0.45s var(--spring);
         }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.85) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .result-box h3 { color: #fed7aa; font-size: 1.28rem; font-weight: 900; }
         .slogan { color: #fef08a; font-weight: 700; font-size: 0.94rem; margin: 0.5rem 0; }
         .btn-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.75rem; }
         .nav-link {
-            background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 800;
-            padding: 0.55rem 1rem; border-radius: 10px; text-decoration: none; font-size: 0.84rem; border: none; cursor: pointer;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-weight: 800;
+            font-family: inherit;
+            padding: 0.55rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.84rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.35);
+            transition: transform 0.28s var(--spring), box-shadow 0.25s ease, filter 0.2s ease;
         }
+        .nav-link:hover {
+            transform: translateY(-4px) scale(1.06);
+            box-shadow: 0 10px 22px rgba(16, 185, 129, 0.5);
+            filter: brightness(1.08);
+        }
+        .nav-link:active { transform: scale(0.95); }
+
+        /* 地圖與搜尋清單 */
         .map-tabs { display: flex; gap: 0.55rem; margin-bottom: 0.75rem; }
-        #map, #gmap-frame { width: 100%; height: 410px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 0.9rem; }
+        #map, #gmap-frame {
+            width: 100%;
+            height: 410px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 0.9rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
         #gmap-frame { display: none; background: #0f172a; }
+
         .search-bar { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
         .search-bar input {
-            flex: 1; background: var(--box-bg); border: 1px solid var(--border); color: #fff;
-            padding: 0.55rem 0.85rem; border-radius: 10px; font-size: 0.86rem;
+            flex: 1;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.55rem 0.85rem;
+            border-radius: 10px;
+            font-size: 0.86rem;
+            font-family: inherit;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
         }
-        .store-list { max-height: 330px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.55rem; }
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 122, 24, 0.2);
+        }
+
+        .store-list {
+            max-height: 330px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            padding: 4px 6px 4px 2px;
+        }
+        .store-list::-webkit-scrollbar { width: 6px; }
+        .store-list::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
+        .store-list::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 8px; }
+        .store-list::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
         .store-item {
-            background: var(--box-bg); border: 1px solid var(--border); border-left: 4px solid transparent;
-            padding: 0.75rem 0.95rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-            transition: 0.2s;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            border-left: 4px solid transparent;
+            padding: 0.75rem 0.95rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.28s var(--spring), border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
         }
-        .store-item:hover { transform: translateY(-2px); border-color: var(--accent); border-left-color: var(--accent); background: rgba(30,41,59,0.95); }
-        .badge { font-size: 0.72rem; padding: 0.14rem 0.48rem; border-radius: 6px; background: rgba(51,65,85,0.9); margin-left: 0.3rem; font-weight: 600; display: inline-block; }
-        .badge.area { background: rgba(56,189,248,0.18); color: #7dd3fc; }
-        .badge.open { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.35); }
-        .badge.closed { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.35); }
-        .del-btn { background: rgba(255,255,255,0.05); border: none; color: #94a3b8; cursor: pointer; font-size: 0.85rem; margin-left: 10px; width: 28px; height: 28px; border-radius: 50%; }
-        .reset-link { color: #fdba74; cursor: pointer; }
+        .store-item:hover {
+            transform: translateY(-3px) scale(1.02);
+            border-color: rgba(255, 122, 24, 0.45);
+            border-left-color: var(--accent);
+            background: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+        }
+        .store-item:active { transform: scale(0.98); }
+
+        .badge {
+            font-size: 0.72rem;
+            padding: 0.14rem 0.48rem;
+            border-radius: 6px;
+            background: rgba(51, 65, 85, 0.9);
+            margin-left: 0.3rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge.area { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
+        .badge.open { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+        .badge.closed { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+        
+        .del-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            transition: transform 0.25s var(--spring), background 0.2s ease, color 0.2s ease;
+        }
+        .del-btn:hover {
+            transform: scale(1.2);
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+        .reset-link {
+            color: #fdba74;
+            cursor: pointer;
+            transition: transform 0.25s var(--spring), color 0.2s ease;
+            display: inline-block;
+        }
+        .reset-link:hover {
+            transform: scale(1.06);
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -166,6 +484,7 @@
 </header>
 
 <div class="container">
+    <!-- 左側面板：篩選、轉盤、PK擂台 -->
     <div class="panel">
         <div class="panel-header">
             <span class="panel-title">1. 美食探索條件設定</span>
@@ -177,6 +496,7 @@
             </div>
         </div>
 
+        <!-- 🕒 營業狀態與早/中/晚/宵夜時段模擬器 -->
         <div class="control-box">
             <div class="control-label">
                 <span>🕒 營業時段過濾與模擬：</span>
@@ -194,6 +514,7 @@
             </div>
         </div>
 
+        <!-- 交通方式與時間距離滑桿 -->
         <div class="control-box">
             <div class="control-label">
                 <span>🚦 移動方式與時間上限：</span>
@@ -208,9 +529,10 @@
             </div>
         </div>
 
+        <!-- 快速定位與 Live 雷達 -->
         <div class="control-box">
             <div class="control-label">
-                <span>📍 出發點：</span>
+                <span>📍 出發點（點擊右側地圖任意處可直接換起點）：</span>
                 <button class="chip scan-special" onclick="scanOverpassAPI()" id="scan-btn">📡 掃描地圖周邊真實店家</button>
             </div>
             <div class="btn-group" id="loc-btns">
@@ -225,6 +547,7 @@
             </div>
         </div>
 
+        <!-- 區域與種類篩選 -->
         <div class="control-box">
             <span class="control-label">🗺️ 商圈篩選：</span>
             <div class="btn-group" id="area-filters" style="margin-bottom:8px;">
@@ -247,23 +570,26 @@
             </div>
         </div>
 
+        <!-- 玩法切換：大轉盤 vs 二選一PK -->
         <div class="game-tabs">
             <div class="game-tab active" id="tab-wheel" onclick="switchGame('wheel')">🎰 命運轉盤模式</div>
             <div class="game-tab" id="tab-pk" onclick="switchGame('pk')">⚔️ 殘酷二選一 PK 賽</div>
         </div>
 
+        <!-- 模式 A：轉盤 -->
         <div id="wheel-section" class="wheel-wrapper">
             <div class="pointer"></div>
             <canvas id="wheel" width="320" height="320"></canvas>
-            <div style="font-size:0.76rem; color:var(--muted); margin-top:6px;">* 每次隨機抽取至多 12 家候選店上場</div>
+            <div style="font-size:0.76rem; color:var(--muted); margin-top:6px;">* 為保持畫面清晰，轉盤每次隨機抽取至多 12 家候選店上場</div>
             <div class="wheel-actions">
                 <button id="spin-btn" class="spin-btn" onclick="spinWheel()">🎰 轉動命運輪盤！</button>
-                <button class="shuffle-btn" onclick="shuffleWheelSample()">🔄 換一批</button>
+                <button class="shuffle-btn" onclick="shuffleWheelSample()">🔄 換一批上轉盤</button>
             </div>
         </div>
 
+        <!-- 模式 B：二選一 PK -->
         <div id="pk-arena">
-            <p style="font-size:0.92rem; color:#fdba74; font-weight:800;" id="pk-round-text">⚔️ 第一回合：直覺點選想吃的那家！</p>
+            <p style="font-size:0.92rem; color:#fdba74; font-weight:800;" id="pk-round-text">⚔️ 第一回合：直覺點選你現在比較想吃的那一家！</p>
             <div class="pk-cards">
                 <div class="pk-card" onclick="choosePK(0)">
                     <h4 id="pk-name-0">店家 A</h4>
@@ -274,43 +600,47 @@
                     <p id="pk-desc-1" style="font-size:0.82rem; color:var(--muted);"></p>
                 </div>
             </div>
-            <button class="shuffle-btn" style="margin-top:0.9rem; width:100%;" onclick="startPK()">🔄 重新洗牌</button>
+            <button class="shuffle-btn" style="margin-top:0.9rem; width:100%;" onclick="startPK()">🔄 重新洗牌開局</button>
         </div>
 
+        <!-- 中獎結果卡 -->
         <div id="result-box" class="result-box">
             <h3 id="res-name">🎉 抽中餐廳</h3>
             <p id="res-meta" style="font-size:0.84rem; color:#cbd5e1; margin-top:4px;"></p>
             <p id="res-slogan" class="slogan"></p>
             <div class="btn-row">
-                <a id="res-nav" class="nav-link" href="#" target="_blank">🗺️ Google Maps 導航</a>
-                <button class="nav-link" style="background:linear-gradient(135deg, #0284c7, #2563eb);" onclick="openInEmbeddedGMap()">🌐 內嵌地圖查看</button>
+                <a id="res-nav" class="nav-link" href="#" target="_blank">🗺️ 開啟 Google Maps 導航</a>
+                <button class="nav-link" style="background:linear-gradient(135deg, #0284c7, #2563eb);" onclick="openInEmbeddedGMap()">🌐 在右側內嵌 Google 地圖查看</button>
             </div>
         </div>
     </div>
 
+    <!-- 右側面板：雙引擎地圖與豐富清單 -->
     <div class="panel">
         <div class="panel-header">
             <span class="panel-title">2. 美食雷達與 Google 地圖檢視</span>
             <span id="loc-status" style="font-size:0.85rem; color:var(--accent-blue); font-weight:700;">📍 海大校門口</span>
         </div>
 
+        <!-- 地圖模式切換 -->
         <div class="map-tabs">
-            <button class="chip active" id="btn-leaflet" onclick="switchMapMode('leaflet')">📍 互動雷達地圖</button>
-            <button class="chip" id="btn-gmap" onclick="switchMapMode('gmap')">🌐 Google Maps 實景模式</button>
+            <button class="chip active" id="btn-leaflet" onclick="switchMapMode('leaflet')">📍 互動雷達地圖 (點地圖可換起點)</button>
+            <button class="chip" id="btn-gmap" onclick="switchMapMode('gmap')">🌐 Google Maps 實景搜尋模式</button>
         </div>
 
         <div id="map"></div>
         <iframe id="gmap-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 
+        <!-- 關鍵字搜尋與手動新增 -->
         <div class="search-bar">
-            <input type="text" id="keyword-input" placeholder="🔍 搜尋店名或餐點..." oninput="applyFilters()">
-            <input type="text" id="custom-store-name" placeholder="➕ 自訂新增..." style="max-width:140px;">
+            <input type="text" id="keyword-input" placeholder="🔍 搜尋店名或餐點 (例：咖哩、水餃、中正路)..." oninput="applyFilters()">
+            <input type="text" id="custom-store-name" placeholder="➕ 輸入自訂店名..." style="max-width:165px;">
             <button class="chip" style="background:linear-gradient(135deg, var(--accent), var(--accent-pink)); color:#fff; border:none; font-weight:700;" onclick="addCustomStore()">新增</button>
         </div>
 
         <div class="control-label">
-            <span>📋 符合條件的店家清單：</span>
-            <span class="reset-link" onclick="resetBlacklist()">↺ 恢復被排除店家</span>
+            <span>📋 符合條件的店家清單（點擊定位，按 ✖ 可暫時踢出轉盤）：</span>
+            <span class="reset-link" onclick="resetBlacklist()">↺ 恢復全部踢除店家</span>
         </div>
         <div id="store-list" class="store-list"></div>
     </div>
@@ -318,55 +648,83 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // 內建 50+ 家基隆在地美食資料庫 (含營業時段 hours: [開始小時, 結束小時]，跨日以 24+ 表示)
     const defaultRestaurants = [
-        { name: "金龍肉焿", area: "中正路", type: "麵", lat: 25.1388, lng: 121.7545, hours: [8, 19], desc: "三沙灣傳奇排隊肉焿" },
-        { name: "三沙灣麵線羹", area: "中正路", type: "麵", lat: 25.1384, lng: 121.7542, hours: [7, 18], desc: "魚漿包大腸頭特色麵線" },
-        { name: "擱再來包子", area: "中正路", type: "速食點心", lat: 25.1392, lng: 121.7550, hours: [6, 20], desc: "爆汁肉包與筍包" },
-        { name: "中正路無名大腸圈", area: "中正路", type: "速食點心", lat: 25.1380, lng: 121.7538, hours: [10, 19], desc: "古早味糯米大腸圈" },
-        { name: "林家三鮮水餃", area: "中正路", type: "麵", lat: 25.1455, lng: 121.7625, hours: [11, 20], desc: "手工三鮮水餃" },
-        { name: "正老牌咖哩麵", area: "中正路", type: "麵", lat: 25.1335, lng: 121.7495, hours: [11, 20], desc: "台式咖哩炒麵與春捲" },
-        { name: "慶有餘麵館", area: "祥豐街", type: "麵", lat: 25.1452, lng: 121.7665, hours: [11, 21], desc: "乾麵與豐富滷味" },
-        { name: "咖哩郎 Curry Man", area: "祥豐街", type: "飯", lat: 25.1408, lng: 121.7582, hours: [11, 21], desc: "日式熟成咖哩飯" },
-        { name: "大四喜牛肉麵", area: "祥豐街", type: "麵", lat: 25.1415, lng: 121.7595, hours: [11, 21], desc: "人氣紅燒牛肉麵" },
-        { name: "臭到府麻辣臭豆腐", area: "祥豐街", type: "鍋物燒肉", lat: 25.1430, lng: 121.7625, hours: [16, 24], desc: "麻辣鴨血臭豆腐煲" },
-        { name: "小峨嵋川菜館", area: "祥豐街", type: "飯", lat: 25.1462, lng: 121.7675, hours: [11, 21], desc: "川菜熱炒與合菜" },
-        { name: "Select 99 吐司", area: "祥豐街", type: "速食點心", lat: 25.1422, lng: 121.7610, hours: [6, 14], desc: "熱壓吐司早午餐" },
-        { name: "祥豐街深夜滷肉飯", area: "祥豐街", type: "飯", lat: 25.1438, lng: 121.7640, hours: [17, 25], desc: "宵夜滷肉飯與肉羹湯" },
-        { name: "雅廬韓式料理", area: "海大", type: "飯", lat: 25.1501, lng: 121.7712, hours: [11, 21], desc: "海大對面石鍋拌飯" },
-        { name: "磨豆咖啡簡餐", area: "海大", type: "飯", lat: 25.1498, lng: 121.7705, hours: [11, 21], desc: "椒麻雞腿簡餐與小火鍋" },
-        { name: "來來牛排館", area: "海大", type: "鍋物燒肉", lat: 25.1494, lng: 121.7695, hours: [11, 22], desc: "鐵板牛排配酥皮濃湯" },
-        { name: "五路鍋聖", area: "海大", type: "鍋物燒肉", lat: 25.1496, lng: 121.7701, hours: [11, 22], desc: "百元小火鍋白飯吃到飽" },
-        { name: "老地方牛肉麵", area: "海大", type: "麵", lat: 25.1502, lng: 121.7718, hours: [11, 21], desc: "家常牛肉麵與炒飯" },
-        { name: "四海遊龍", area: "海大", type: "麵", lat: 25.1499, lng: 121.7708, hours: [10, 21], desc: "鍋貼與酸辣湯" },
-        { name: "涂大的吉古拉", area: "正濱", type: "速食點心", lat: 25.1526, lng: 121.7641, hours: [7, 16], desc: "正濱漁港碳烤吉古拉" },
-        { name: "下麵", area: "正濱", type: "麵", lat: 25.1531, lng: 121.7649, hours: [11, 20], desc: "彩虹屋港景創意拌麵" },
-        { name: "河豚很多", area: "正濱", type: "飯", lat: 25.1538, lng: 121.7662, hours: [11, 21], desc: "防空洞義大利麵與燉飯" },
-        { name: "海那邊冰店", area: "正濱", type: "速食點心", lat: 25.1533, lng: 121.7652, hours: [12, 18], desc: "日式文青刨冰與茶泡飯" },
-        { name: "和平島藍媽媽水餃", area: "正濱", type: "麵", lat: 25.1582, lng: 121.7650, hours: [11, 20], desc: "特色海藻水餃" },
-        { name: "太祖魷魚羹", area: "新豐街", type: "麵", lat: 25.1380, lng: 121.7870, hours: [11, 21], desc: "沙茶魷魚羹麵" },
-        { name: "五郎拉麵", area: "新豐街", type: "麵", lat: 25.1382, lng: 121.7868, hours: [11, 21], desc: "豚骨拉麵與炙燒叉燒" },
-        { name: "涮乃葉", area: "新豐街", type: "鍋物燒肉", lat: 25.1369, lng: 121.7895, hours: [11, 22], desc: "日式涮涮鍋吃到飽" },
-        { name: "八方雲集", area: "新豐街", type: "麵", lat: 25.1375, lng: 121.7882, hours: [10, 21], desc: "鍋貼與玉米濃湯" },
-        { name: "摩斯漢堡", area: "新豐街", type: "速食點心", lat: 25.1372, lng: 121.7888, hours: [6, 23], desc: "珍珠米漢堡" },
-        { name: "孫東寶台式牛排", area: "新豐街", type: "鍋物燒肉", lat: 25.1370, lng: 121.7890, hours: [11, 21], desc: "100%原肉主義牛排" },
-        { name: "麥當勞 (深溪店)", area: "深溪信義", type: "速食點心", lat: 25.1325, lng: 121.7848, hours: [0, 24], desc: "24小時速食霸主" },
-        { name: "金牌咖哩炒麵", area: "深溪信義", type: "麵", lat: 25.1310, lng: 121.7865, hours: [11, 21], desc: "濃郁咖哩炒麵" },
-        { name: "石二鍋", area: "深溪信義", type: "鍋物燒肉", lat: 25.1302, lng: 121.7835, hours: [11, 22], desc: "王品爆香石頭鍋" },
-        { name: "築間幸福鍋物", area: "深溪信義", type: "鍋物燒肉", lat: 25.1318, lng: 121.7852, hours: [11, 28], desc: "營業至凌晨4點" },
-        { name: "肯德基 KFC", area: "深溪信義", type: "速食點心", lat: 25.1306, lng: 121.7840, hours: [9, 23], desc: "咔啦脆雞與蛋撻" },
-        { name: "爭鮮迴轉壽司", area: "深溪信義", type: "飯", lat: 25.1304, lng: 121.7838, hours: [11, 21], desc: "生魚片握壽司" },
-        { name: "老牌莊燒賣大王", area: "深溪信義", type: "速食點心", lat: 25.1288, lng: 121.7625, hours: [6, 19], desc: "東信路大燒賣" },
-        { name: "義美自助火鍋城", area: "深溪信義", type: "鍋物燒肉", lat: 25.1315, lng: 121.7485, hours: [11, 24], desc: "人氣現炒石頭火鍋" },
-        { name: "燒肉Smile", area: "八斗子", type: "鍋物燒肉", lat: 25.1438, lng: 121.8021, hours: [11, 28], desc: "海景個人燒肉" },
-        { name: "望海巷石頭火鍋", area: "八斗子", type: "鍋物燒肉", lat: 25.1398, lng: 121.8010, hours: [11, 21], desc: "八斗子石頭火鍋" },
-        { name: "春興水餃店", area: "八斗子", type: "麵", lat: 25.1418, lng: 121.7945, hours: [11, 20], desc: "皮薄餡多韭菜水餃" }
+        // 【中正路 / 三沙灣】
+        { name: "金龍肉焿", area: "中正路", type: "麵", lat: 25.1388, lng: 121.7545, hours: [8, 19], desc: "三沙灣傳奇排隊肉焿、豬腳與滷肉飯" },
+        { name: "三沙灣麵線羹 (麥克麵線)", area: "中正路", type: "麵", lat: 25.1384, lng: 121.7542, hours: [7, 18], desc: "魚漿包大腸頭的基隆特色麵線羹" },
+        { name: "擱再來包子", area: "中正路", type: "速食點心", lat: 25.1392, lng: 121.7550, hours: [6, 20], desc: "中正路人氣爆汁肉包與筍包" },
+        { name: "中正路無名大腸圈", area: "中正路", type: "速食點心", lat: 25.1380, lng: 121.7538, hours: [10, 19], desc: "傳統古早味糯米大腸圈配黑白切" },
+        { name: "林家三鮮水餃", area: "中正路", type: "麵", lat: 25.1455, lng: 121.7625, hours: [11, 20], desc: "中正路手工現包三鮮水餃與酸辣湯" },
+        { name: "正老牌咖哩麵", area: "中正路", type: "麵", lat: 25.1335, lng: 121.7495, hours: [11, 20], desc: "濃郁台式咖哩炒麵與酥炸春捲" },
+        { name: "阿信豆漿 (中正路)", area: "中正路", type: "速食點心", lat: 25.1412, lng: 121.7570, hours: [5, 13], desc: "中正路人氣傳統早餐豆漿燒餅" },
+        { name: "中正路紅燒牛肉麵", area: "中正路", type: "麵", lat: 25.1430, lng: 121.7590, hours: [11, 21], desc: "大塊牛腱肉與濃郁紅燒湯頭" },
+
+        // 【祥豐街沿線】
+        { name: "慶有餘麵館", area: "祥豐街", type: "麵", lat: 25.1452, lng: 121.7665, hours: [11, 21], desc: "祥豐街必吃乾麵、麻醬麵與豐富滷味" },
+        { name: "咖哩郎 Curry Man", area: "祥豐街", type: "飯", lat: 25.1408, lng: 121.7582, hours: [11, 21], desc: "平價濃郁日式熟成咖哩飯加起司" },
+        { name: "大四喜牛肉麵", area: "祥豐街", type: "麵", lat: 25.1415, lng: 121.7595, hours: [11, 21], desc: "祥豐街人氣紅燒牛肉麵與水餃" },
+        { name: "臭到府麻辣臭豆腐", area: "祥豐街", type: "鍋物燒肉", lat: 25.1430, lng: 121.7625, hours: [16, 24], desc: "超入味麻辣鴨血臭豆腐煲" },
+        { name: "小峨嵋川菜館", area: "祥豐街", type: "飯", lat: 25.1462, lng: 121.7675, hours: [11, 21], desc: "經典下飯川菜熱炒與合菜便當" },
+        { name: "Select 99 吐司工坊", area: "祥豐街", type: "速食點心", lat: 25.1422, lng: 121.7610, hours: [6, 14], desc: "現烤熱壓吐司與早午餐" },
+        { name: "填飽肚子早午餐", area: "祥豐街", type: "速食點心", lat: 25.1475, lng: 121.7685, hours: [7, 15], desc: "美式漢堡、帕尼尼與脆薯拼盤" },
+        { name: "祥豐街深夜滷肉飯", area: "祥豐街", type: "飯", lat: 25.1438, lng: 121.7640, hours: [17, 25], desc: "宵夜時段熱騰騰滷肉飯與肉羹湯" },
+        { name: "祥豐街台灣第一家塩酥雞", area: "祥豐街", type: "速食點心", lat: 25.1445, lng: 121.7652, hours: [16, 25], desc: "罪惡宵夜首選炸物拼盤" },
+
+        // 【海大 / 北寧路周邊】
+        { name: "雅廬韓式料理", area: "海大", type: "飯", lat: 25.1501, lng: 121.7712, hours: [11, 21], desc: "海大對面經典石鍋拌飯與韓式烤肉" },
+        { name: "磨豆人文咖啡簡餐", area: "海大", type: "飯", lat: 25.1498, lng: 121.7705, hours: [11, 21], desc: "大份量椒麻雞腿簡餐與小火鍋" },
+        { name: "來來牛排館", area: "海大", type: "鍋物燒肉", lat: 25.1494, lng: 121.7695, hours: [11, 22], desc: "高CP值鐵板牛排配酥皮濃湯" },
+        { name: "五路鍋聖 (海大店)", area: "海大", type: "鍋物燒肉", lat: 25.1496, lng: 121.7701, hours: [11, 22], desc: "白飯冰淇淋吃到飽的百元小火鍋" },
+        { name: "老地方牛肉麵", area: "海大", type: "麵", lat: 25.1502, lng: 121.7718, hours: [11, 21], desc: "海大學生常吃的家常牛肉麵與炒飯" },
+        { name: "港式燒臘便當 (北寧路)", area: "海大", type: "飯", lat: 25.1500, lng: 121.7715, hours: [10, 20], desc: "油雞烤鴨三寶飯配靈魂蔥油" },
+        { name: "四海遊龍 (海大店)", area: "海大", type: "麵", lat: 25.1499, lng: 121.7708, hours: [10, 21], desc: "酥脆鍋貼、水餃與酸辣湯" },
+        { name: "麥味登早午餐 (海大店)", area: "海大", type: "速食點心", lat: 25.1503, lng: 121.7720, hours: [6, 14], desc: "卡啦雞腿堡與港式蘿蔔糕" },
+
+        // 【正濱漁港 / 和平島】
+        { name: "涂大的吉古拉", area: "正濱", type: "速食點心", lat: 25.1526, lng: 121.7641, hours: [7, 16], desc: "正濱漁港必吃手工碳烤鯊魚漿吉古拉" },
+        { name: "下麵 Let's Have Noodles", area: "正濱", type: "麵", lat: 25.1531, lng: 121.7649, hours: [11, 20], desc: "彩虹屋港景創意拌麵與海鮮炸物" },
+        { name: "河豚很多", area: "正濱", type: "飯", lat: 25.1538, lng: 121.7662, hours: [11, 21], desc: "防空洞裡的義大利麵、燉飯與排餐" },
+        { name: "海那邊冰店", area: "正濱", type: "速食點心", lat: 25.1533, lng: 121.7652, hours: [12, 18], desc: "彩虹屋日式文青刨冰與茶泡飯" },
+        { name: "和平島藍媽媽水餃", area: "正濱", type: "麵", lat: 25.1582, lng: 121.7650, hours: [11, 20], desc: "和平島特色海藻水餃與透抽水餃" },
+        { name: "和平島阿九鯊魚羹", area: "正濱", type: "麵", lat: 25.1578, lng: 121.7642, hours: [10, 19], desc: "在地人激推的鮮甜鯊魚羹麵" },
+
+        // 【新豐街商圈】
+        { name: "太祖魷魚羹 (新豐店)", area: "新豐街", type: "麵", lat: 25.1380, lng: 121.7870, hours: [11, 21], desc: "經典沙茶魷魚羹麵與魯肉飯" },
+        { name: "五郎拉麵", area: "新豐街", type: "麵", lat: 25.1382, lng: 121.7868, hours: [11, 21], desc: "濃郁豚骨湯頭與炙燒叉燒拉麵" },
+        { name: "涮乃葉 (基隆新豐店)", area: "新豐街", type: "鍋物燒肉", lat: 25.1369, lng: 121.7895, hours: [11, 22], desc: "日式涮涮鍋肉盤與濃厚咖哩飯吃到飽" },
+        { name: "八方雲集 (新豐店)", area: "新豐街", type: "麵", lat: 25.1375, lng: 121.7882, hours: [10, 21], desc: "招牌鍋貼、玉米濃湯與紹辣乾麵" },
+        { name: "摩斯漢堡 (基隆新豐店)", area: "新豐街", type: "速食點心", lat: 25.1372, lng: 121.7888, hours: [6, 23], desc: "海洋珍珠米漢堡與摩斯紅茶" },
+        { name: "孫東寶台式牛排 (新豐店)", area: "新豐街", type: "鍋物燒肉", lat: 25.1370, lng: 121.7890, hours: [11, 21], desc: "100%原肉主義台式鐵板牛排與爆漿餐包" },
+        { name: "三媽臭臭鍋 (新豐店)", area: "新豐街", type: "鍋物燒肉", lat: 25.1381, lng: 121.7865, hours: [11, 23], desc: "經典大腸臭臭鍋與泡菜鍋" },
+        { name: "清原芋圓 (新豐店)", area: "新豐街", type: "速食點心", lat: 25.1378, lng: 121.7876, hours: [10, 22], desc: "芋頭控必喝芋見泥與嫩仙草" },
+
+        // 【深溪路 / 信義區】
+        { name: "麥當勞 (基隆深溪店)", area: "深溪信義", type: "速食點心", lat: 25.1325, lng: 121.7848, hours: [0, 24], desc: "24小時速食霸主，大麥克與麥克雞塊" },
+        { name: "金牌咖哩炒麵 (深溪店)", area: "深溪信義", type: "麵", lat: 25.1310, lng: 121.7865, hours: [11, 21], desc: "大火快炒鍋氣十足的濃郁咖哩炒麵" },
+        { name: "石二鍋 (基隆愛買店)", area: "深溪信義", type: "鍋物燒肉", lat: 25.1302, lng: 121.7835, hours: [11, 22], desc: "王品旗下爆香石頭鍋與冬瓜檸檬冰沙" },
+        { name: "築間幸福鍋物 (深溪店)", area: "深溪信義", type: "鍋物燒肉", lat: 25.1318, lng: 121.7852, hours: [11, 28], desc: "營業到凌晨4點的招牌石頭火鍋與自助吧" },
+        { name: "肯德基 KFC (基隆深溪)", area: "深溪信義", type: "速食點心", lat: 25.1306, lng: 121.7840, hours: [9, 23], desc: "咔啦脆雞配原味蛋撻" },
+        { name: "爭鮮迴轉壽司 (深溪店)", area: "深溪信義", type: "飯", lat: 25.1304, lng: 121.7838, hours: [11, 21], desc: "生魚片握壽司與味噌湯" },
+        { name: "必勝客 PizzaHut (深溪店)", area: "深溪信義", type: "速食點心", lat: 25.1322, lng: 121.7855, hours: [11, 23], desc: "現烤獨享披薩與烤雞拼盤" },
+        { name: "老牌莊燒賣大王 (信義區)", area: "深溪信義", type: "速食點心", lat: 25.1288, lng: 121.7625, hours: [6, 19], desc: "東信路在地老字號大燒賣與排骨酥湯" },
+        { name: "霸味薑母鴨 (東信路)", area: "深溪信義", type: "鍋物燒肉", lat: 25.1292, lng: 121.7650, hours: [16, 25], desc: "炭火熬煮薑母鴨配麻油麵線" },
+        { name: "周家蔥油餅 / 豆漿 (信二路)", area: "深溪信義", type: "速食點心", lat: 25.1312, lng: 121.7478, hours: [5, 13], desc: "先煎後烤酥脆蔥油餅加蛋" },
+        { name: "義美自助火鍋城 (信二路)", area: "深溪信義", type: "鍋物燒肉", lat: 25.1315, lng: 121.7485, hours: [11, 24], desc: "基隆超人氣現炒石頭火鍋老店" },
+
+        // 【八斗子 / 潮境公園】
+        { name: "燒肉Smile (潮境公園店)", area: "八斗子", type: "鍋物燒肉", lat: 25.1438, lng: 121.8021, hours: [11, 28], desc: "邊看無敵海景邊烤肉，營業至凌晨4點" },
+        { name: "築間幸福鍋物 (潮境公園店)", area: "八斗子", type: "鍋物燒肉", lat: 25.1440, lng: 121.8023, hours: [11, 28], desc: "270度海景第一排吃火鍋，營業至凌晨4點" },
+        { name: "望海巷石頭火鍋", area: "八斗子", type: "鍋物燒肉", lat: 25.1398, lng: 121.8010, hours: [11, 21], desc: "八斗子人氣爆香石頭火鍋與海鮮盤" },
+        { name: "八斗子春興水餃店", area: "八斗子", type: "麵", lat: 25.1418, lng: 121.7945, hours: [11, 20], desc: "皮薄餡多韭菜水餃與滷味海帶" },
+        { name: "漁品軒海鮮餐廳 / 鎖管米粉", area: "八斗子", type: "麵", lat: 25.1425, lng: 121.7920, hours: [10, 21], desc: "鮮甜白鯧海鮮米粉與熱炒" }
     ];
 
     let restaurants = [...defaultRestaurants];
     let blacklist = new Set();
     let userLoc = { lat: 25.1504, lng: 121.7725, name: "海大校門口" };
     let travelMode = "walk";
-    let simTime = "now";
+    let simTime = "now"; // 'now' or 8, 12, 18, 23
     let filters = { area: "all", type: "all" };
     let filteredList = [];
     let wheelSample = [];
@@ -374,6 +732,7 @@
     let isSpinning = false;
     let lastWinner = null;
 
+    // Web Audio API 音效合成器
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTickSound(freq = 600, duration = 0.03) {
         if (!document.getElementById('sound-toggle').checked) return;
@@ -391,6 +750,7 @@
         [523, 659, 783, 1046].forEach((f, idx) => setTimeout(() => playTickSound(f, 0.15), idx * 100));
     }
 
+    // 判斷店家是否營業中 (支援跨午夜時段如 [11, 28])
     function isStoreOpen(store) {
         const hrs = store.hours || [10, 21];
         const [openH, closeH] = hrs;
@@ -416,6 +776,7 @@
         applyFilters();
     }
 
+    // 初始化 Leaflet 地圖
     const map = L.map('map').setView([userLoc.lat, userLoc.lng], 14);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
     let userMarker = null;
@@ -425,7 +786,7 @@
     map.on('click', function(e) {
         document.querySelectorAll('.loc-btn').forEach(b => b.classList.remove('active'));
         userLoc = { lat: e.latlng.lat, lng: e.latlng.lng, name: "地圖自訂點擊位置" };
-        document.getElementById('loc-status').textContent = `📍 自訂位置`;
+        document.getElementById('loc-status').textContent = `📍 自訂位置 (${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)})`;
         updateUserMarker();
         applyFilters();
     });
@@ -473,13 +834,13 @@
         if (userMarker) map.removeLayer(userMarker);
         userMarker = L.circleMarker([userLoc.lat, userLoc.lng], {
             radius: 10, fillColor: "#38bdf8", color: "#fff", weight: 3, fillOpacity: 1
-        }).addTo(map).bindPopup(`<b>📍 出發點：${userLoc.name}</b>`);
+        }).addTo(map).bindPopup(`<b>📍 出發點：${userLoc.name}</b><br><small>點擊地圖任意處可移動起點</small>`);
         map.setView([userLoc.lat, userLoc.lng], 14);
     }
 
     async function scanOverpassAPI() {
         const btn = document.getElementById('scan-btn');
-        btn.textContent = "⏳ 掃描中...";
+        btn.textContent = "⏳ 掃描地圖伺服器中...";
         btn.disabled = true;
         try {
             const query = `[out:json][timeout:15];(node["amenity"~"restaurant|fast_food|cafe|food_court"](around:1800,${userLoc.lat},${userLoc.lng}););out body;`;
@@ -489,15 +850,21 @@
             data.elements.forEach(el => {
                 if (el.tags && el.tags.name && !restaurants.some(r => r.name === el.tags.name)) {
                     restaurants.push({
-                        name: el.tags.name, area: "地圖即時掃描", type: "飯",
-                        lat: el.lat, lng: el.lon, hours: [9, 22], desc: "OpenStreetMap 即時抓取"
+                        name: el.tags.name,
+                        area: "地圖即時掃描",
+                        type: el.tags.amenity === "fast_food" ? "速食點心" : "飯",
+                        lat: el.lat, lng: el.lon,
+                        hours: [9, 22],
+                        desc: el.tags.cuisine ? `地圖真實地標 (${el.tags.cuisine})` : "OpenStreetMap 即時抓取周邊店家"
                     });
                     added++;
                 }
             });
-            alert(`📡 成功額外抓出 ${added} 家周邊真實店家！`);
+            alert(`📡 掃描完成！已從地圖資料庫為您額外抓出 ${added} 家周邊真實店家！`);
             applyFilters();
-        } catch (err) { alert("連線逾時"); }
+        } catch (err) {
+            alert("連線忙碌中，請稍後再試！");
+        }
         btn.textContent = "📡 掃描地圖周邊真實店家";
         btn.disabled = false;
     }
@@ -521,7 +888,7 @@
             const matchOpen = !onlyOpen || isStoreOpen(r);
             const matchArea = filters.area === 'all' || r.area === filters.area || r.area === "地圖即時掃描";
             const matchType = filters.type === 'all' || r.type === filters.type;
-            const matchKw = !kw || r.name.toLowerCase().includes(kw) || r.desc.toLowerCase().includes(kw);
+            const matchKw = !kw || r.name.toLowerCase().includes(kw) || r.desc.toLowerCase().includes(kw) || r.area.toLowerCase().includes(kw);
             return mins <= maxTime && matchOpen && matchArea && matchType && matchKw;
         });
 
@@ -547,8 +914,8 @@
 
         if (wheelSample.length === 0) {
             ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#f8fafc"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center";
-            ctx.fillText("無符合店家，請調整條件", cx, cy);
+            ctx.fillStyle = "#f8fafc"; ctx.font = "bold 14px 'Noto Sans TC', sans-serif"; ctx.textAlign = "center";
+            ctx.fillText("此條件/時段無營業店家，可切換模擬時段", cx, cy);
             return;
         }
 
@@ -562,8 +929,8 @@
             ctx.strokeStyle = "#0b1120"; ctx.lineWidth = 2.5; ctx.stroke();
 
             ctx.save(); ctx.translate(cx, cy); ctx.rotate(start + slice/2);
-            ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = "700 12px sans-serif";
-            ctx.fillText(item.name.length > 8 ? item.name.slice(0,8)+"…" : item.name, r - 15, 5);
+            ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = "700 13px 'Noto Sans TC', sans-serif";
+            ctx.fillText(item.name.length > 9 ? item.name.slice(0,9)+"…" : item.name, r - 15, 5);
             ctx.restore();
         });
     }
@@ -620,7 +987,7 @@
 
         if (showCard) {
             document.getElementById('res-name').textContent = `🎉 命中註定：${store.name}`;
-            document.getElementById('res-meta').textContent = `📍 ${store.area} ｜ ${store.type} ｜ 🕒 ${formatHours(store)}`;
+            document.getElementById('res-meta').textContent = `📍 區域：${store.area} ｜ 分類：${store.type} ｜ 🕒 營業時間：${formatHours(store)}`;
             document.getElementById('res-slogan').textContent = `👉 ${store.desc}！距離約 ${dist}m，${modeIcon}只要 ${mins} 分鐘！`;
             const gmode = travelMode === 'walk' ? 'walking' : 'two-wheeler';
             document.getElementById('res-nav').href = `https://www.google.com/maps/dir/?api=1&origin=${userLoc.lat},${userLoc.lng}&destination=${encodeURIComponent(store.name + ' 基隆')}&travelmode=${gmode}`;
@@ -639,7 +1006,7 @@
 
     function startPK() {
         if (filteredList.length < 2) {
-            document.getElementById('pk-round-text').textContent = "⚠️ 候選店家不足 2 家！";
+            document.getElementById('pk-round-text').textContent = "⚠️ 候選店家不足 2 家，請放寬篩選條件或切換模擬時段！";
             return;
         }
         pkPool = [...filteredList].sort(() => Math.random() - 0.5).slice(0, 5);
@@ -649,7 +1016,7 @@
     }
 
     function renderPKPair() {
-        document.getElementById('pk-round-text').textContent = `⚔️ 第 ${pkRound} / 4 回合：點選想吃的那家！`;
+        document.getElementById('pk-round-text').textContent = `⚔️ 第 ${pkRound} / 4 回合：憑直覺點選你想吃的那家！`;
         [0, 1].forEach(i => {
             const s = pkCurrentPair[i];
             const { mins } = calcTravel(userLoc.lat, userLoc.lng, s.lat, s.lng);
@@ -662,7 +1029,7 @@
         playTickSound(750, 0.06);
         const stay = pkCurrentPair[winnerIdx];
         if (pkPool.length === 0) {
-            document.getElementById('pk-round-text').textContent = `🏆 PK 冠軍：${stay.name}！`;
+            document.getElementById('pk-round-text').textContent = `🏆 PK 最終冠軍誕生：${stay.name}！`;
             celebrateWinner(stay);
         } else {
             pkRound++;
@@ -679,14 +1046,18 @@
         if (mode === 'gmap') {
             const q = lastWinner ? `基隆 ${lastWinner.name}` : `基隆 ${userLoc.name} 美食`;
             updateGMapFrame(q);
-        } else { setTimeout(() => map.invalidateSize(), 100); }
+        } else {
+            setTimeout(() => map.invalidateSize(), 100);
+        }
     }
 
     function updateGMapFrame(query) {
         document.getElementById('gmap-frame').src = `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
     }
 
-    function openInEmbeddedGMap() { switchMapMode('gmap'); }
+    function openInEmbeddedGMap() {
+        switchMapMode('gmap');
+    }
 
     function addCustomStore() {
         const inp = document.getElementById('custom-store-name');
@@ -696,7 +1067,8 @@
             name, area: "自訂新增", type: "飯",
             lat: userLoc.lat + (Math.random()-0.5)*0.004,
             lng: userLoc.lng + (Math.random()-0.5)*0.004,
-            hours: [0, 24], desc: "手動新增愛店"
+            hours: [0, 24],
+            desc: "使用者手動加入的口袋愛店"
         });
         inp.value = "";
         applyFilters();
@@ -724,14 +1096,16 @@
             const hrsText = formatHours(store);
             const { dist, mins } = calcTravel(userLoc.lat, userLoc.lng, store.lat, store.lng);
             const marker = L.marker([store.lat, store.lng]).addTo(storeMarkers)
-                .bindPopup(`<b>${store.name}</b> (${store.area})<br>${store.desc}<br>🕒 ${hrsText} (${open ? '營業中' : '休息中'})`);
+                .bindPopup(`<b>${store.name}</b> (${store.area})<br>${store.desc}<br>🕒 ${hrsText} (${open ? '營業中' : '休息中'})<br>${modeIcon} 約 ${mins} 分鐘 (${dist}m)`);
 
             const item = document.createElement('div');
             item.className = 'store-item';
             item.onclick = () => {
                 if (document.getElementById('gmap-frame').style.display === 'block') {
                     updateGMapFrame(`基隆 ${store.name}`);
-                } else { marker.openPopup(); }
+                } else {
+                    marker.openPopup();
+                }
                 focusStore(store, true);
             };
             item.innerHTML = `
@@ -746,7 +1120,7 @@
                     <div style="text-align:right; font-size:0.85rem; color:#fdba74; font-weight:700; white-space:nowrap;">
                         ${modeIcon} ${mins} 分<br><span style="font-size:0.72rem; color:var(--muted); font-weight:500;">${dist}m</span>
                     </div>
-                    <button class="del-btn" title="排除此店" onclick="removeStore(event, '${store.name}')">✖</button>
+                    <button class="del-btn" title="今天不想吃這家" onclick="removeStore(event, '${store.name}')">✖</button>
                 </div>
             `;
             listEl.appendChild(item);
